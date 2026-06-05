@@ -1,0 +1,33 @@
+<!-- ExpCSS RECONSTRUCTION | Article Skeleton v2.0 -->
+<div class="c-article" container-type="inline-size">
+    <div class="article-meta">
+        <span>&#128100; {{ author.name if author else 'Anonymous' }}</span>
+        <span>&#128197; {{ created_at }}</span>
+        <span class="tag uppercase text-brand-red">{{ category_name }}</span>
+    </div>
+
+    {% if featured_img %}
+    <div class="content-card mb-8">
+        <img src="{{ rel_prefix }}assets/{{ featured_img }}" alt="{{ title }}" class="w-full h-auto rounded-lg">
+    </div>
+    {% endif %}
+
+    <div class="article-body">
+        <h1 class="text-4xl md:text-6xl font-black mb-8">{{ title }}</h1>
+        
+        <div class="prose prose-invert max-w-none text-gray-300">
+            {{ html_body | safe }}
+        </div>
+    </div>
+
+    <!-- Author Profile Footer -->
+    {% if author %}
+    <div class="mt-12 p-6 bg-[#171717] rounded-xl border border-gray-800 flex items-center gap-6">
+        <img src="{{ rel_prefix }}assets/{{ author.image_url }}" alt="{{ author.name }}" class="w-16 h-16 rounded-full object-cover border-2 border-[#fe3626]">
+        <div>
+            <h3 class="font-bold text-lg text-white">{{ author.name }}</h3>
+            <p class="text-gray-400 text-xs mt-1">{{ author.bio }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>

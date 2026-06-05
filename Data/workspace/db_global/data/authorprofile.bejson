@@ -1,0 +1,35 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "104",
+  "Format_Creator": "Elton Boehnen",
+  "Parent_Hierarchy": "../104a.mfdb.bejson",
+  "Records_Type": [
+    "AuthorProfile"
+  ],
+  "Fields": [
+    {
+      "name": "author_uuid",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "bio",
+      "type": "string"
+    },
+    {
+      "name": "image_url",
+      "type": "string"
+    }
+  ],
+  "Values": [
+    [
+      "7ffe146b-5682-4576-9321-be575a5f3462",
+      "Boehnenelton2024",
+      "Null",
+      ""
+    ]
+  ]
+}
