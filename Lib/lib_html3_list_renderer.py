@@ -4,15 +4,12 @@ Family:       HTML3
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      2.0.0 OFFICIAL
+Version:      2.1.1 OFFICIAL
               MFDB Version: 1.31
 Format_Creator: Elton Boehnen
-Date:         2026-05-31
+Date:         2026-06-05
 Description:  Authoritative List / Tree / Sidebar renderer for BEJSON 104 documents.
-              Fixed: field detection now uses bejson_core_get_field_map (cached).
-              Fixed: FK convention aware — accepts both parent_id and parent_id_fk.
-              Fixed: no hardcoded fallback field indices; unknown fields resolve to None.
-              Style: BECSS HTML3 — white/black/#DE2626 palette, Inter + Source Code Pro.
+REMEDIATED:   Purged transition stubs for Core (Phase 1).
 RELATIONAL_ID: a1b2c3d4-e5f6-7890-ab12-cd34ef567890
 """
 
@@ -23,19 +20,23 @@ import sys
 from typing import Any, Dict, List, Optional
 
 SCRIPT_NAME    = "lib_html3_list_renderer.py"
-SCRIPT_VERSION = "2.0.0"
+SCRIPT_VERSION = "2.1.1"
 RELATIONAL_ID  = "a1b2c3d4-e5f6-7890-ab12-cd34ef567890"
 
 LIB_DIR = os.path.dirname(os.path.abspath(__file__))
 if LIB_DIR not in sys.path:
     sys.path.append(LIB_DIR)
 
-try:
-    import lib_bejson_core as BEJSONCore
-    _HAS_CORE = True
-except ImportError:
-    _HAS_CORE = False
+import lib_bejson_core as BEJSONCore
 
+# --- Legacy Fallback Constants ---
+_LIST_LEGACY = {
+    "id": 0, "title": 1, "name": 1, "label": 1,
+    "description": 2, "desc": 2,
+    "parent_id": 3, "parent_id_fk": 3, "parent": 3,
+    "url": 4, "href": 4, "link": 4,
+    "action_url": 5, "action_label": 6
+}
 
 # ---------------------------------------------------------------------------
 # BEJSON field resolution helpers
@@ -44,14 +45,12 @@ except ImportError:
 def _get_field_map(doc: dict) -> Dict[str, int]:
     """
     Returns {field_name_lower: index} for the Fields array.
-    Uses bejson_core_get_field_map when available (cached); falls back to
-    manual construction. Keys are lowercased for case-insensitive lookup.
+    Uses bejson_core_get_field_map (cached). Keys are lowercased for
+    case-insensitive lookup.
     """
-    if _HAS_CORE:
-        raw = BEJSONCore.bejson_core_get_field_map(doc)
-        return {k.lower(): v for k, v in raw.items()}
-    fields = doc.get("Fields", [])
-    return {f["name"].lower(): i for i, f in enumerate(fields)}
+    raw = BEJSONCore.bejson_core_get_field_map(doc)
+    # Note: list_renderer historically uses lowercase keys internally
+    return {k.lower(): v for k, v in raw.items()}
 
 
 def _resolve_field(f_map: Dict[str, int], *candidates) -> int:
@@ -60,19 +59,27 @@ def _resolve_field(f_map: Dict[str, int], *candidates) -> int:
     Supports FK-convention aliases: if candidate ends with _fk, also try
     without the suffix, and vice versa.
     Candidates are checked in order; first match wins.
+    If no match in f_map, falls back to _LIST_LEGACY.
     """
     for name in candidates:
-        if name in f_map:
-            return f_map[name]
+        name_l = name.lower()
+        if name_l in f_map:
+            return f_map[name_l]
         # Try FK variant: if looking for "parent_id", also try "parent_id_fk"
-        fk_name = name + "_fk"
+        fk_name = name_l + "_fk"
         if fk_name in f_map:
             return f_map[fk_name]
         # If the candidate already ends in _fk, also try without it
-        if name.endswith("_fk"):
-            base = name[:-3]
+        if name_l.endswith("_fk"):
+            base = name_l[:-3]
             if base in f_map:
                 return f_map[base]
+    
+    # --- Safe Get Fallback (Migration Phase 5.3) ---
+    for name in candidates:
+        if name in _LIST_LEGACY:
+            return _LIST_LEGACY[name]
+            
     return -1
 
 

@@ -86,25 +86,24 @@ class ExpCSS_Builder:
         footer_html = Template(footer_raw).render()
         
         contact_footer = """
-        <div class="c-footer-links" style="background: #050505; border-top: 1px solid #222; padding: 2rem; margin-top: 4rem;">
-            <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="c-footer-links" style="background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 1rem; margin-top: 4rem;">
+            <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
                 <div>
-                    <h4 style="color: #DE2626; font-weight: 800; margin-bottom: 1rem;">CONTACT</h4>
-                    <p style="font-size: 0.8rem; color: #888;">Email: info@boehnenelton.dev</p>
-                    <p style="font-size: 0.8rem; color: #888;">Location: Distributed Node</p>
+                    <h4 style="color: var(--accent); font-weight: 800; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;">CONTACT</h4>
+                    <p style="font-size: 0.9rem; color: #888; line-height: 1.8;">Email: info@boehnenelton.dev<br>Location: Distributed Node</p>
                 </div>
                 <div>
-                    <h4 style="color: #DE2626; font-weight: 800; margin-bottom: 1rem;">RESOURCES</h4>
-                    <ul style="list-style: none; padding: 0; font-size: 0.8rem; color: #888;">
-                        <li><a href="#" style="color: inherit;">Documentation</a></li>
-                        <li><a href="#" style="color: inherit;">API Status</a></li>
+                    <h4 style="color: var(--accent); font-weight: 800; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;">RESOURCES</h4>
+                    <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #888; line-height: 2;">
+                        <li><a href="#" style="color: inherit; text-decoration: none;">Documentation</a></li>
+                        <li><a href="#" style="color: inherit; text-decoration: none;">API Status</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 style="color: #DE2626; font-weight: 800; margin-bottom: 1rem;">LEGAL</h4>
-                    <ul style="list-style: none; padding: 0; font-size: 0.8rem; color: #888;">
-                        <li><a href="#" style="color: inherit;">Privacy Policy</a></li>
-                        <li><a href="#" style="color: inherit;">Terms of Service</a></li>
+                    <h4 style="color: var(--accent); font-weight: 800; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px;">LEGAL</h4>
+                    <ul style="list-style: none; padding: 0; font-size: 0.9rem; color: #888; line-height: 2;">
+                        <li><a href="#" style="color: inherit; text-decoration: none;">Privacy Policy</a></li>
+                        <li><a href="#" style="color: inherit; text-decoration: none;">Terms of Service</a></li>
                     </ul>
                 </div>
             </div>
@@ -123,14 +122,22 @@ class ExpCSS_Builder:
         }
 
         # 4. Build Homepage
-        self._build_homepage(self.global_context)
-
-        # 5. Build Categories & Pages
-        for cat in categories:
-            self._build_category(cat, self.global_context)
-            
-        # 6. Generate Sitemap
-        self._generate_sitemap()
+        landing_mode = site_config.get("landing_mode", "feed")
+        if landing_mode == "html":
+            home_content = site_config.get("landing_html", "<h1>Welcome</h1>")
+        elif landing_mode == "image":
+            img = site_config.get("landing_image", "")
+            home_content = f'<div class="c-hero-image" style="text-align:center; padding: 4rem 0;"><img src="assets/{img}" style="max-width:100%; border-radius:12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);"></div>'
+        else:
+            home_skel = self._read_template("components/body/Template-Standard-Hero-Section-body-component.html")
+            home_content = Template(home_skel).render({
+                "site_title": context["site_title"],
+                "hero_sub": context["site_tagline"]
+            })
+        
+        html = self._render_page(home_content, context)
+        with open(os.path.join(self.output_dir, "index.html"), "w") as f:
+            f.write(html)
 
     def _sync_css(self):
         src_css = os.path.join(self.templates_root, "css")
@@ -150,12 +157,17 @@ class ExpCSS_Builder:
     def _copy_assets(self):
         assets_dest = os.path.join(self.output_dir, "assets")
         os.makedirs(assets_dest, exist_ok=True)
-        if os.path.exists(self.cms.assets_dir):
-            for item in os.listdir(self.cms.assets_dir):
-                s = os.path.join(self.cms.assets_dir, item)
-                d = os.path.join(assets_dest, item)
-                if os.path.isfile(s):
-                    shutil.copy2(s, d)
+        
+        assets = self.cms.get_assets()
+        for a in assets:
+            folder = a.get("folder", "")
+            target_dir = os.path.join(assets_dest, folder) if folder else assets_dest
+            os.makedirs(target_dir, exist_ok=True)
+            
+            src = os.path.join(self.cms.assets_dir, a["filename"])
+            dest = os.path.join(target_dir, a["filename"])
+            if os.path.exists(src):
+                shutil.copy2(src, dest)
 
     def _generate_sidebar(self, context, rel_prefix=""):
         renderer = HTML3_List_Renderer()

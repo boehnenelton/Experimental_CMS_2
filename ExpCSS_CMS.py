@@ -96,6 +96,19 @@ def dashboard():
 def about():
     return render_template("about.html")
 
+@app.route('/landing_editor', methods=['GET', 'POST'])
+def landing_editor():
+    if request.method == 'POST':
+        cms.add_global_config("landing_mode", request.form.get('landing_mode'))
+        cms.add_global_config("landing_html", request.form.get('landing_html'))
+        cms.add_global_config("landing_image", request.form.get('landing_image'))
+        flash('Landing page configuration updated')
+        return redirect(url_for('landing_editor'))
+    
+    configs = cms.get_global_configs()
+    assets = cms.get_assets()
+    return render_template("landing_editor.html", configs=configs, assets=assets)
+
 @app.route('/config', methods=['GET', 'POST'])
 def config():
     if request.method == 'POST':
@@ -137,29 +150,46 @@ def media_library():
 
 @app.route('/media/upload', methods=['POST'])
 def media_upload():
+    import zipfile
     files = request.files.getlist('files')
     uploaded = 0
     skipped = 0
+    
+    def process_data(data, original_filename, content_type, folder=""):
+        nonlocal uploaded, skipped
+        if not content_type.startswith('image/'):
+            # Basic extension check as fallback
+            if not original_filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg')):
+                skipped += 1
+                return False
+        
+        f_hash = cms.get_file_hash(data)
+        if cms.get_asset_by_hash(f_hash):
+            skipped += 1
+            return False
+            
+        filename = secure_filename(original_filename)
+        if os.path.exists(os.path.join(cms.assets_dir, filename)):
+            base, ext = os.path.splitext(filename)
+            filename = f"{base}_{uuid.uuid4().hex[:4]}{ext}"
+            
+        with open(os.path.join(cms.assets_dir, filename), "wb") as wf:
+            wf.write(data)
+        cms.add_asset(filename, original_filename, f_hash, len(data), content_type, folder)
+        uploaded += 1
+        return True
+
     for f in files:
         if f:
-            data = f.read()
-            f_hash = cms.get_file_hash(data)
-            existing = cms.get_asset_by_hash(f_hash)
-            if existing:
-                skipped += 1
-                continue
-            
-            filename = secure_filename(f.filename)
-            if os.path.exists(os.path.join(cms.assets_dir, filename)):
-                base, ext = os.path.splitext(filename)
-                filename = f"{base}_{uuid.uuid4().hex[:4]}{ext}"
-            
-            fpath = os.path.join(cms.assets_dir, filename)
-            with open(fpath, "wb") as wf:
-                wf.write(data)
-            
-            cms.add_asset(filename, f.filename, f_hash, len(data), f.content_type)
-            uploaded += 1
+            if f.filename.endswith('.zip'):
+                with zipfile.ZipFile(f, 'r') as z:
+                    for name in z.namelist():
+                        if name.startswith('__MACOSX') or name.endswith('/'): continue
+                        folder = os.path.dirname(name)
+                        data = z.read(name)
+                        process_data(data, os.path.basename(name), mimetypes.guess_type(name)[0] or 'application/octet-stream', folder)
+            else:
+                process_data(f.read(), f.filename, f.content_type)
             
     flash(f"Uploaded {uploaded}, Skipped {skipped}")
     return redirect(url_for('media_library'))
@@ -200,8 +230,11 @@ def categories():
 
 @app.route('/categories/delete/<slug>')
 def category_delete(slug):
-    cms.delete_category(slug)
-    flash('Category deleted')
+    if slug == "uncategorized":
+        flash('Cannot delete the default category.')
+    else:
+        cms.delete_category(slug)
+        flash('Category deleted')
     return redirect(url_for('categories'))
 
 @app.route('/pages')

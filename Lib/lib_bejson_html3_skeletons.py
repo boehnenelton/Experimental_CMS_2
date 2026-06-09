@@ -65,15 +65,10 @@ BRUTAL_COLOR = {
 # ═══════════════════════════════════════════════════════
 
 # Import component CSS
-# Relative import works when loaded as a package; falls back to absolute import
-# when Lib/ is on sys.path directly (e.g. ExpCSS_CMS.py loads it top-level).
 try:
     from .lib_bejson_html3_component_css import COMPONENT_CSS
 except ImportError:
-    try:
-        from lib_bejson_html3_component_css import COMPONENT_CSS  # absolute fallback
-    except ImportError:
-        COMPONENT_CSS = ""
+    COMPONENT_CSS = ""
 
 CSS_CORE_SKELETON = """
 @layer reset, base, layout, components, interactive;
@@ -203,10 +198,10 @@ CSS_CORE = CSS_CORE_SKELETON.replace("{COMPONENT_CSS}", COMPONENT_CSS)
 # Brutal Theme Refinement
 CSS_BRUTAL = CSS_CORE_SKELETON.replace("{COMPONENT_CSS}", COMPONENT_CSS) + """
 @layer components {{
-    .c-card {{ border: 4px solid var(--border); border-radius: 0; box-shadow: var(--shadow-sm); }}
-    .c-button {{ border-radius: 0; border: 2px solid var(--text-main); font-weight: 900; }}
-    .c-input {{ border-radius: 0; border: 2px solid var(--border); }}
-    .c-table {{ border: 2px solid var(--border); }}
+    .c-card {{ border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }}
+    .c-button {{ border-radius: var(--radius); border: 1px solid var(--text-main); font-weight: 600; }}
+    .c-input {{ border-radius: var(--radius); border: 1px solid var(--border); }}
+    .c-table {{ border: 1px solid var(--border); }}
     .c-table th {{ border-bottom: 4px solid var(--border); background: var(--primary); color: white; }}
     .c-stats-bar {{ border: 4px solid var(--border); border-radius: 0; }}
 }}

@@ -1,480 +1,523 @@
 """
-FILE:         lib_bejson_html3_component_css.py
-DESCRIPTION:  BECSS Component Layer CSS — injected into CSS_CORE_SKELETON via replace().
-              All braces are doubled ({{ / }}) because the parent CSS_CORE_SKELETON
-              goes through str.format(**COLOR) after this is substituted in.
-VERSION:      1.0.0
-DATE:         2026-06-03
-AUTHOR:       Elton Boehnen
-EMAIL:        boehnenelton@gmail.com
-SITE:         boehnenelton2024.pages.dev
-GITHUB:       github.com/boehnenelton
-RELATIONAL_ID: e1f2a3b4-5c6d-7e8f-9a0b-1c2d3e4f5a6b
-CHANGELOG:
-  1.0.0 — 2026-06-03 — Initial creation. Provides the missing @layer components
-                        and @layer utilities blocks that CSS_CORE_SKELETON expects
-                        from this module.
+Library:      lib_bejson_html3_component_css.py
+Family:       HTML3
+Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
+Status:       OFFICIAL
+Author:       Elton Boehnen
+Version:      3.0.1 OFFICIAL
+            MFDB Version: 1.31
+Format_Creator: Elton Boehnen
+Date:         2026-05-29
+Description:  Central registry for BECSS component styles.
+              Organized into the @layer components layer.
 """
 
-# ─────────────────────────────────────────────────────────────────────────────
-# NOTE ON BRACE ESCAPING
-# CSS_CORE_SKELETON uses str.format(**COLOR) on the assembled CSS string.
-# Because COMPONENT_CSS is inserted via str.replace() *before* .format() runs,
-# every CSS brace must be doubled: { → {{ and } → }}
-# The only un-doubled tokens are COLOR keys like {primary}, {bg_page}, etc.
-# ─────────────────────────────────────────────────────────────────────────────
+VERSION = "3.0.0"
+SCRIPT_NAME = "lib_bejson_html3_component_css.py"
+RELATIONAL_ID = "c7d6b5a4-1f8a-4e8a-9d6c-5f4b5a6c7d8f"
 
 COMPONENT_CSS = """
-
-/* ═══════════════════════════════════════════════════
-   BECSS COMPONENT LAYER (v2026)
-   Cards · Buttons · Tables · Utilities · Badges
-   ═══════════════════════════════════════════════════ */
-
 @layer components {{
-
-    /* ── SIDEBAR (base) ── */
-    .c-sidebar {{
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        background: var(--bg-page);
-        border-right: 1px solid var(--border);
-        overflow: hidden;
+    /* Stats Bar */
+    .c-stats-bar {{
+        display: flex; gap: 24px; padding: 24px;
+        background: var(--bg-surface); margin-bottom: 24px;
+        border-left: 4px solid var(--primary);
     }}
-    .c-sidebar__links {{
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
+    .c-stats-bar__item {{ flex: 1; }}
+    .c-stats-bar__label {{
+        font-size: 0.65rem; color: var(--text-muted);
+        font-family: var(--font-mono); text-transform: uppercase;
     }}
-
-    /* ── HAMBURGER ── */
-    .c-hamburger {{
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        padding: 6px;
-        background: none;
-        border: none;
-        flex-shrink: 0;
-    }}
-    .c-hamburger span {{
-        display: block;
-        width: 20px;
-        height: 2px;
-        background: currentColor;
-        transition: var(--transition);
-    }}
-    @media (min-width: 1025px) {{
-        .c-hamburger {{ display: none; }}
+    .c-stats-bar__value {{
+        font-size: 1.5rem; font-weight: 800; color: var(--primary);
     }}
 
-    /* ── CARD ── */
+    /* Cards */
     .c-card {{
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1rem;
-        margin-bottom: 1rem;
+        background: var(--bg-page); border: 1px solid var(--border);
+        padding: 24px; margin-bottom: 24px; border-radius: var(--radius);
         box-shadow: var(--shadow-sm);
     }}
     .c-card__title {{
-        font-weight: 800;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-main);
-        margin-bottom: 0.5rem;
+        font-size: 1.1rem; color: var(--primary);
+        text-transform: uppercase; letter-spacing: 0.05em;
+        margin-bottom: 12px; font-weight: 800;
     }}
-    .c-card__body {{
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        line-height: 1.6;
-    }}
-    .c-card-grid {{
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
+    .c-card__body {{ font-size: 0.95rem; color: var(--text-main); }}
+    
+    .c-card--brutal {{
+        border: 1px solid var(--border); border-radius: var(--radius);
+        box-shadow: 8px 8px 0px var(--border);
     }}
 
-    /* ── PRIMARY BUTTON / CODE-BOX COPY (c-code-box__copy acts as the
-       primary action button across the CMS) ── */
-    .c-code-box__copy {{
-        display: inline-block;
-        background: var(--primary);
-        color: #fff;
-        border: none;
-        border-radius: var(--radius);
-        padding: 8px 16px;
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        font-weight: 700;
+    /* Badges */
+    .c-badge {{
+        font-family: var(--font-mono); font-size: 0.65rem;
+        font-weight: 800; padding: 2px 8px;
+        background: var(--bg-alt); border-radius: 2px;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        cursor: pointer;
-        text-decoration: none;
-        transition: var(--transition);
-        white-space: nowrap;
     }}
-    .c-code-box__copy:hover {{
-        opacity: 0.88;
-        text-decoration: none;
-        color: #fff;
-    }}
+    .c-badge--success {{ color: oklch(70% 0.2 140); }}
+    .c-badge--fail {{ color: oklch(60% 0.2 25); }}
 
-    /* ── CODE BOX (full) ── */
+    /* Code Box */
     .c-code-box {{
-        background: var(--bg-alt);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        overflow: hidden;
-        margin-bottom: 1rem;
+        background: #000; border-left: 4px solid var(--primary);
+        margin: 24px 0; position: relative;
     }}
     .c-code-box__header {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 12px;
-        background: oklch(12% 0 0);
-        border-bottom: 1px solid var(--border);
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 16px; background: rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }}
     .c-code-box__title {{
-        font-family: var(--font-mono);
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: oklch(70% 0 0);
+        font-family: var(--font-mono); font-size: 0.7rem;
+        color: var(--primary); font-weight: 800; text-transform: uppercase;
     }}
-    .c-code-box__pre {{
-        margin: 0;
-        padding: 1rem;
-        overflow-x: auto;
-        font-size: 0.85rem;
-        background: oklch(10% 0 0);
+    .c-code-box__copy {{
+        background: var(--primary); color: white; border: none;
+        padding: 4px 12px; font-size: 0.65rem; font-weight: 800;
+        cursor: pointer; text-transform: uppercase;
     }}
-    .c-code-box__code {{
-        font-family: var(--font-mono);
-        color: oklch(90% 0 0);
-    }}
+    .c-code-box__pre {{ margin: 0; padding: 20px; color: oklch(85% 0.2 140); overflow-x: auto; }}
+    .c-code-box__code {{ font-family: var(--font-mono); font-size: 0.85rem; }}
 
-    /* ── STATS BAR ── */
-    .c-stats-bar {{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        padding: 0.75rem 1rem;
-        background: var(--bg-alt);
+    /* Tables */
+    .c-table-container {{ 
+        width: 100%; 
+        overflow-x: auto; 
+        margin-bottom: 24px; 
         border: 1px solid var(--border);
         border-radius: var(--radius);
-        margin-bottom: 1rem;
-    }}
-    .c-stats-bar__item {{
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 80px;
-    }}
-    .c-stats-bar__label {{
-        font-family: var(--font-mono);
-        font-size: 0.55rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--text-muted);
-    }}
-    .c-stats-bar__value {{
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: var(--text-main);
-    }}
-
-    /* ── TABLE ── */
-    .c-table-container {{
-        overflow-x: auto;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        margin-bottom: 1rem;
     }}
     .c-table {{
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
+        width: 100%; border-collapse: collapse; font-size: 0.9rem;
+        min-width: 600px;
     }}
     .c-table th {{
-        padding: 10px 12px;
-        text-align: left;
-        font-family: var(--font-mono);
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--text-muted);
-        background: var(--bg-alt);
-        border-bottom: 1px solid var(--border);
-        white-space: nowrap;
+        background: var(--bg-alt); padding: 12px; text-align: left;
+        font-weight: 800; text-transform: uppercase; font-size: 0.75rem;
+        border-bottom: 2px solid var(--border); color: var(--text-muted);
+        position: sticky; top: 0; z-index: 10;
     }}
-    .c-table td {{
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--border-muted);
-        color: var(--text-main);
-        vertical-align: middle;
+    .c-table td {{ 
+        padding: 12px; 
+        border-bottom: 1px solid var(--border-muted); 
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }}
-    .c-table tr:last-child td {{ border-bottom: none; }}
-    .c-table tr:hover td {{ background: var(--bg-alt); }}
+    .c-table tr:hover {{ background: var(--bg-alt); }}
 
-    /* ── INPUT ── */
-    .c-input {{
-        display: block;
-        width: 100%;
-        background: var(--bg-page);
-        color: var(--text-main);
-        border: 1px solid var(--border);
+    /* Subtabs */
+    .c-subtabs {{ 
+        display: flex; 
+        gap: 0; 
+        margin-bottom: 12px; 
+        border: 1px solid var(--border); 
+        width: 100%; 
+        overflow-x: auto; 
+        scrollbar-width: none; 
+        -ms-overflow-style: none;
+    }}
+    .c-subtabs::-webkit-scrollbar {{ display: none; }}
+    .c-subtabs__btn {{
+        border: none; padding: 12px 24px; font-weight: 800; font-size: 0.8rem;
+        cursor: pointer; font-family: var(--font-sans); background: transparent;
+        color: var(--text-muted); transition: var(--transition);
+        white-space: nowrap;
+        border-right: 1px solid var(--border);
+    }}
+    .c-subtabs__btn:last-child {{ border-right: none; }}
+    .c-subtabs__btn:hover {{ background: var(--bg-alt); color: var(--primary); }}
+    .c-subtabs__btn--active {{ background: var(--primary) !important; color: white !important; }}
+
+    /* Typography & Body Text */
+    .c-card__body {{ 
+        font-size: 0.95rem; 
+        color: var(--text-main); 
+        line-height: 1.7;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }}
+    .c-card__body p {{ margin-bottom: 1.25rem; }}
+    .c-card__body ul, .c-card__body ol {{ margin-bottom: 1.25rem; padding-left: 1.5rem; }}
+    .c-card__body li {{ margin-bottom: 0.6rem; }}
+    .c-card__body h1, .c-card__body h2, .c-card__body h3 {{ 
+        color: var(--primary); 
+        margin-top: 1.5rem; 
+        margin-bottom: 0.75rem; 
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+    }}
+
+    .c-dl {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
+    .c-dl__item {{ margin-bottom: 12px; border-left: 2px solid var(--border); padding-left: 12px; }}
+    .c-dl__term {{ font-size: 0.65rem; font-family: var(--font-mono); color: var(--text-muted); text-transform: uppercase; }}
+    .c-dl__desc {{ font-weight: 700; font-size: 1rem; color: var(--text-main); }}
+    /* Card Grid */
+    .c-card-grid {{
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+    }}
+
+    /* Widgets */
+    .c-widget {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        display: flex; flex-direction: column; overflow: hidden;
+        border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    }}
+    .c-widget__header {{
+        padding: 8px 16px; background: var(--bg-alt);
+        border-bottom: 1px solid var(--border); display: flex;
+        justify-content: space-between; font-family: var(--font-mono);
+        font-size: 0.7rem; font-weight: 700;
+    }}
+    .c-widget__body {{ flex: 1; padding: 16px; overflow: auto; }}
+
+    /* Gallery */
+    .c-gallery-grid {{
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+    }}
+    .c-gallery-item {{
+        background: var(--bg-surface); border: 1px solid var(--border);
+        padding: 8px; border-radius: var(--radius); transition: var(--transition);
+    }}
+    .c-gallery-item:hover {{ transform: translateY(-2px); box-shadow: var(--shadow-sm); }}
+    .c-gallery-item img {{ width: 100%; height: 150px; object-fit: cover; border-radius: 4px; display: block; }}
+    .c-gallery-item__label {{
+        margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);
+        text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }}
+
+    /* Video Grid */
+    .c-video-grid {{
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+    }}
+    .c-video-card {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        border-radius: var(--radius); overflow: hidden;
+    }}
+    .c-video-card__header {{
+        padding: 10px 16px; background: var(--bg-alt);
+        font-weight: 700; font-size: 0.85rem; border-bottom: 1px solid var(--border);
+    }}
+    .c-video-card__embed {{ position: relative; padding-bottom: 56.25%; height: 0; }}
+    .c-video-card__embed iframe {{
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+    }}
+
+    /* Info Box */
+    .c-info-box {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        padding: 24px; border-radius: var(--radius); position: relative;
+    }}
+    .c-info-box__title {{
+        font-size: 1rem; font-weight: 800; color: var(--primary);
+        margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }}
+    .c-info-box__dot {{ width: 8px; height: 8px; background: var(--primary); border-radius: 50%; }}
+    .c-info-box__content {{ font-size: 0.95rem; color: var(--text-main); line-height: 1.5; }}
+    .c-info-box__link {{
+        display: inline-block; margin-top: 16px; font-size: 0.85rem;
+        font-weight: 700; color: var(--primary); text-decoration: none;
+    }}
+
+    /* Carousel */
+    .c-carousel {{ position: relative; overflow: hidden; width: 100%; border: 1px solid var(--border); background: var(--bg-surface); }}
+    .c-carousel__track {{ display: flex; transition: transform 0.3s ease; }}
+    .c-carousel__slide {{ min-width: 100%; padding: 20px; box-sizing: border-box; }}
+    .c-carousel__controls {{ display: flex; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.05); }}
+    .c-carousel__btn {{
+        background: transparent; border: 1px solid var(--primary);
+        color: var(--primary); font-family: var(--font-mono);
+        padding: 5px 12px; cursor: pointer; font-weight: 700; font-size: 0.75rem;
+    }}
+    .c-carousel__btn:hover {{ background: var(--primary); color: white; }}
+
+    /* Dialog */
+    .c-dialog-mask {{
+        display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    }}
+    .c-dialog {{
+        position: relative; background-color: var(--bg-page); margin: 10% auto; padding: 0;
+        border: 2px solid var(--primary); width: 80%; max-width: 600px;
+        box-shadow: 10px 10px 0px rgba(0,0,0,0.1); border-radius: var(--radius);
+    }}
+    .c-dialog__header {{
+        padding: 12px 20px; background: var(--bg-alt); border-bottom: 1px solid var(--border);
+        display: flex; justify-content: space-between; align-items: center;
+    }}
+    .c-dialog__title {{ font-family: var(--font-mono); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; color: var(--primary); }}
+    .c-dialog__close {{ background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); }}
+    .c-dialog__body {{ padding: 24px; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; }}
+    .c-dialog__footer {{
+        padding: 12px 20px; background: var(--bg-alt); border-top: 1px solid var(--border);
+        display: flex; justify-content: flex-end; gap: 12px;
+    }}
+
+    /* Lightbox */
+    .c-lightbox {{ display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); }}
+    .c-lightbox__content {{ margin: auto; display: block; width: 85%; max-width: 1200px; max-height: 85%; margin-top: 5%; object-fit: contain; }}
+    .c-lightbox__caption {{ margin: auto; display: block; width: 80%; text-align: center; color: white; padding: 20px 0; font-family: var(--font-mono); font-size: 0.9rem; }}
+    .c-lightbox__close {{ position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }}
+    /* Table Controls & Pagination */
+    .c-table-controls {{ display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }}
+    .c-table-controls__label {{ font-family: var(--font-mono); font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; }}
+    .c-table-controls__select, .c-table-controls__input {{ 
+        font-family: var(--font-sans); font-size: 0.8rem; padding: 4px 12px; 
+        background-color: var(--bg-page); color: var(--text-main); border: 1px solid var(--border); 
+        border-radius: var(--radius); outline: none; cursor: pointer;
+    }}
+    .c-table-controls__select:focus, .c-table-controls__input:focus {{ border-color: var(--primary); }}
+    .c-table-controls__count {{ margin-left: auto; font-family: var(--font-mono); color: var(--text-muted); font-size: 0.7rem; font-weight: 700; }}
+
+    .c-pagination {{ display: flex; align-items: center; gap: 8px; margin-top: 16px; }}
+    .c-pagination__btn {{
+        background: var(--bg-alt); border: 1px solid var(--border);
+        padding: 4px 12px; border-radius: var(--radius); cursor: pointer;
+        font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+        transition: var(--transition);
+    }}
+    .c-pagination__btn:hover:not(:disabled) {{ background: var(--primary); color: white; border-color: var(--primary); }}
+    .c-pagination__btn:disabled {{ opacity: 0.4; cursor: not-allowed; }}
+    .c-pagination__info {{ font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }}
+
+    /* Indicators (Used in Table Cells) */
+    .c-indicator {{ font-weight: 800; text-transform: uppercase; }}
+    .c-indicator--success {{ color: oklch(70% 0.2 140); }}
+    .c-indicator--fail {{ color: oklch(60% 0.2 25); }}
+    .c-null-val {{ color: var(--text-muted); font-style: italic; opacity: 0.7; }}
+    /* Animations */
+    .c-terminal-boot {{ font-family: var(--font-mono); color: var(--text-muted); padding: 24px; }}
+    .c-terminal-line {{ margin-bottom: 8px; font-size: 0.85rem; }}
+
+    .c-glitch-wrapper {{ position: relative; text-align: center; }}
+    .c-glitch-text {{
+        font-size: clamp(3rem, 10vw, 7rem); font-weight: 900;
+        letter-spacing: 0.5rem; color: var(--text-main); position: relative;
+    }}
+    .c-glitch-text::before, .c-glitch-text::after {{
+        content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent;
+    }}
+    .c-glitch-text::before {{ left: 4px; text-shadow: -3px 0 var(--primary); clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); animation: glitch-anim-1 0.4s infinite; }}
+    .c-glitch-text::after {{ left: -4px; text-shadow: 3px 0 var(--text-main); clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); animation: glitch-anim-1 0.3s infinite reverse; }}
+    .c-glitch-subtitle {{ color: var(--primary); letter-spacing: 0.3rem; margin-top: 1rem; font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; }}
+    /* Metrics */
+    .c-metric-card {{
+        background: var(--bg-surface); border: 1px solid var(--border);
+        padding: 24px; border-top: 4px solid var(--primary);
+        transition: var(--transition); border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }}
+    .c-metric-card__title {{
+        font-family: var(--font-mono); font-size: 0.7rem;
+        color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;
+        font-weight: 700;
+    }}
+    .c-metric-card__value {{ font-size: 2rem; font-weight: 800; color: var(--text-main); }}
+    .c-metric-card__trend {{
+        font-family: var(--font-mono); font-size: 0.75rem;
+        margin-top: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px;
+    }}
+    .c-metric-card__trend-label {{ color: var(--text-muted); font-weight: 400; font-size: 0.7rem; }}
+
+    .c-data-dist {{
+        margin-bottom: 24px; background: var(--bg-surface);
+        border: 1px solid var(--border); padding: 20px;
         border-radius: var(--radius);
-        padding: 10px 12px;
-        font-family: var(--font-sans);
-        font-size: 0.85rem;
-        transition: border-color 0.2s ease;
-        outline: none;
+    }}
+    .c-data-dist__title {{
+        font-family: var(--font-mono); font-size: 0.75rem;
+        color: var(--text-muted); text-transform: uppercase;
+        margin-bottom: 16px; font-weight: 800;
+    }}
+    .c-data-dist__track {{
+        width: 100%; height: 16px; background: var(--border-muted);
+        overflow: hidden; margin-bottom: 20px; display: flex;
+        border-radius: 8px;
+    }}
+    .c-data-dist__bar {{ height: 100%; transition: width 0.3s ease; }}
+    .c-data-dist__legend {{ display: flex; flex-wrap: wrap; gap: 20px; }}
+    .c-data-dist__legend-item {{ display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-main); }}
+    .c-data-dist__swatch {{ width: 12px; height: 12px; border-radius: 2px; }}
+
+    .c-summary-stats {{
+        margin-bottom: 24px; background: var(--bg-surface);
+        border: 1px solid var(--border); border-radius: var(--radius);
+        overflow: hidden; display: flex; flex-direction: column;
+    }}
+    .c-summary-stats__header {{
+        padding: 12px 20px; border-bottom: 1px solid var(--border);
+        font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800;
+        color: var(--text-main); text-transform: uppercase; background: var(--bg-alt);
+    }}
+    .c-summary-stats__grid {{ display: flex; flex-wrap: wrap; background: var(--bg-page); }}
+    .c-summary-stats__item {{
+        flex: 1; min-width: 100px; text-align: center;
+        border-right: 1px solid var(--border-muted); padding: 16px;
+    }}
+    .c-summary-stats__item:last-child {{ border-right: none; }}
+    .c-summary-stats__label {{
+        font-family: var(--font-mono); font-size: 0.65rem;
+        color: var(--text-muted); text-transform: uppercase;
+    }}
+    .c-summary-stats__value {{ font-size: 1.1rem; font-weight: 800; color: var(--primary); margin-top: 4px; }}
+    /* Feed & Grid */
+    .c-feed {{ display: flex; flex-direction: column; gap: 32px; }}
+    .c-feed-item {{
+        padding-bottom: 32px; border-bottom: 1px solid var(--border-muted);
+    }}
+    .c-feed-item:last-child {{ border-bottom: none; }}
+    .c-feed-item__title {{ font-size: 1.5rem; margin-bottom: 8px; font-weight: 800; }}
+    .c-feed-item__title a {{ color: var(--text-main); }}
+    .c-feed-item__title a:hover {{ color: var(--primary); text-decoration: none; }}
+    .c-feed-item__meta {{ font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); margin-bottom: 16px; }}
+    .c-feed-item__body {{ font-size: 1.1rem; line-height: 1.6; color: var(--text-main); }}
+    .c-feed-item__tags {{ display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }}
+    .c-feed-tag {{
+        font-family: var(--font-mono); font-size: 0.65rem; background: var(--bg-alt);
+        padding: 4px 10px; border-radius: 100px; color: var(--text-muted);
+        font-weight: 700; text-transform: uppercase;
+    }}
+    /* Bento Grid */
+    .c-bento-grid {{
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-auto-rows: 200px; gap: 16px; padding: 16px; width: 100%;
+    }}
+    .c-bento-item {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        padding: 24px; display: flex; flex-direction: column;
+        transition: var(--transition); border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+    }}
+    .c-bento-item:hover {{ transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }}
+    .c-bento-item--w2 {{ grid-column: span 2; }}
+    .c-bento-item--w3 {{ grid-column: span 2; grid-row: span 2; }}
+    .c-bento-item__label {{
+        font-family: var(--font-mono); font-size: 0.7rem; color: var(--primary);
+        font-weight: 800; text-transform: uppercase; margin-bottom: 8px;
+    }}
+    .c-bento-item__value {{ font-size: 1.5rem; font-weight: 800; color: var(--text-main); }}
+    .c-bento-item--w3 .c-bento-item__value {{ font-size: 3rem; }}
+    /* Forms & Buttons */
+    .c-button {{
+        background: var(--primary); color: white; border: none;
+        padding: 10px 24px; font-family: var(--font-mono); font-weight: 800;
+        font-size: 0.75rem; cursor: pointer; border-radius: var(--radius);
+        text-transform: uppercase; transition: var(--transition);
+        display: inline-block; text-align: center;
+    }}
+    .c-button:hover {{ opacity: 0.9; transform: translateY(-1px); }}
+    .c-button:active {{ transform: translateY(0); }}
+
+    .c-input {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        color: var(--text-main); padding: 8px 12px; font-family: var(--font-sans);
+        font-size: 0.9rem; border-radius: var(--radius); outline: none;
+        width: 100%; transition: border-color 0.2s;
     }}
     .c-input:focus {{ border-color: var(--primary); }}
+/* Utilities */
+.u-mb-8 {{ margin-bottom: 8px; }}
+.u-font-mono {{ font-family: var(--font-mono); }}
+.u-fs-tiny {{ font-size: 0.65rem; }}
+.u-fs-small {{ font-size: 0.75rem; }}
+.u-text-muted {{ color: var(--text-muted); }}
 
-    /* ── ACCORDION ── */
-    .c-accordion {{ border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }}
+/* Dark Mode Utility */
+.u-dark {{
+    --bg-page: oklch(10% 0 0);
+    --bg-alt: oklch(15% 0 0);
+    --bg-surface: oklch(15% 0 0);
+    --text-main: oklch(95% 0 0);
+    --text-muted: oklch(60% 0 0);
+    --border: oklch(25% 0 0);
+    --border-muted: oklch(20% 0 0);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+}}
+.u-dark body {{ background-color: var(--bg-page); color: var(--text-main); }}
+.u-dark .c-header, .u-dark .c-sidebar, .u-dark .c-footer {{ background-color: var(--bg-page); border-color: var(--border); }}
+.u-dark .c-card, .u-dark .c-widget, .u-dark .c-table {{ background-color: var(--bg-alt); border-color: var(--border); }}
+.u-dark .c-table th {{ background-color: var(--bg-page); color: var(--text-muted); }}
+}}
+
+    /* Toasts */
+    .c-toast-container {{
+        position: fixed; top: 24px; right: 24px; z-index: 9999;
+        display: flex; flex-direction: column; gap: 12px;
+    }}
+    .c-toast {{
+        background: var(--bg-page); border: 1px solid var(--border);
+        padding: 16px 24px; border-radius: var(--radius);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: var(--font-sans); font-size: 0.85rem; font-weight: 600;
+        display: flex; align-items: center; gap: 12px; min-width: 280px;
+        animation: toast-in 0.3s ease-out forwards;
+        border-left: 4px solid var(--primary);
+    }}
+    @keyframes toast-in {{ from {{ opacity: 0; transform: translateX(20px); }} to {{ opacity: 1; transform: translateX(0); }} }}
+
+    /* Progress Bar */
+    .c-progress-container {{ width: 100%; margin: 12px 0; }}
+    .c-progress-bar {{
+        width: 100%; height: 8px; background: var(--bg-alt);
+        border-radius: 100px; overflow: hidden; position: relative;
+    }}
+    .c-progress-fill {{
+        height: 100%; background: var(--primary); border-radius: 100px;
+        transition: width 0.4s ease;
+    }}
+    .c-progress-label {{
+        display: flex; justify-content: space-between; margin-bottom: 6px;
+        font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted);
+        text-transform: uppercase; font-weight: 700;
+    }}
+
+    /* Empty State */
+    .c-empty-state {{
+        padding: 60px 24px; text-align: center; background: var(--bg-surface);
+        border: 1px dashed var(--border); border-radius: var(--radius);
+        display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }}
+    .c-empty-state__icon {{ font-size: 3rem; opacity: 0.3; }}
+    .c-empty-state__title {{ font-weight: 800; font-size: 1.1rem; color: var(--text-main); }}
+    .c-empty-state__text {{ font-size: 0.9rem; color: var(--text-muted); max-width: 400px; }}
+
+    /* Accordion */
+    .c-accordion {{ border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }}
     .c-accordion__item {{ border-bottom: 1px solid var(--border); }}
     .c-accordion__item:last-child {{ border-bottom: none; }}
     .c-accordion__header {{
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 12px 16px; cursor: pointer; font-weight: 700;
-        font-size: 0.85rem; background: var(--bg-alt);
-        transition: var(--transition);
-    }}
-    .c-accordion__header:hover {{ color: var(--primary); }}
-    .c-accordion__icon {{ transition: transform 0.2s ease; font-size: 0.8rem; }}
-    .c-accordion__item[open] .c-accordion__icon {{ transform: rotate(90deg); }}
-    .c-accordion__content {{ padding: 12px 16px; font-size: 0.85rem; color: var(--text-muted); }}
-
-    /* ── PROGRESS BAR ── */
-    .c-progress-container {{ margin-bottom: 1rem; }}
-    .c-progress-label {{
-        display: flex; justify-content: space-between;
-        font-family: var(--font-mono); font-size: 0.65rem;
-        text-transform: uppercase; letter-spacing: 0.05em;
-        color: var(--text-muted); margin-bottom: 4px;
-    }}
-    .c-progress-bar {{
-        height: 6px; background: var(--bg-alt);
-        border-radius: 999px; overflow: hidden;
-        border: 1px solid var(--border-muted);
-    }}
-    .c-progress-fill {{
-        height: 100%; background: var(--primary);
-        border-radius: 999px; transition: width 0.4s ease;
-    }}
-
-    /* ── SUBTABS ── */
-    .c-subtabs {{
-        display: flex; gap: 4px;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 1rem; overflow-x: auto;
-    }}
-    .c-subtabs__btn {{
-        padding: 8px 16px; border: none; background: none;
-        font-family: var(--font-mono); font-size: 0.7rem;
-        text-transform: uppercase; letter-spacing: 0.05em;
-        cursor: pointer; color: var(--text-muted);
-        border-bottom: 2px solid transparent;
-        transition: var(--transition); white-space: nowrap;
-    }}
-    .c-subtabs__btn:hover {{ color: var(--primary); }}
-    .c-subtabs__btn--active {{ color: var(--primary); border-bottom-color: var(--primary); }}
-    .c-tab-content {{ display: none; }}
-    .c-tab-content--active {{ display: block; }}
-
-    /* ── DEFINITION LIST ── */
-    .c-dl {{ display: flex; flex-direction: column; gap: 8px; }}
-    .c-dl__item {{
+        padding: 16px 20px; background: var(--bg-page); cursor: pointer;
         display: flex; justify-content: space-between; align-items: center;
-        padding: 8px 0; border-bottom: 1px solid var(--border-muted);
-        font-size: 0.85rem;
+        font-weight: 700; font-size: 0.9rem; transition: background 0.2s;
     }}
-    .c-dl__item:last-child {{ border-bottom: none; }}
-    .c-dl__term {{ color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; }}
-    .c-dl__desc {{ font-weight: 600; }}
+    .c-accordion__header:hover {{ background: var(--bg-alt); }}
+    .c-accordion__icon {{ transition: transform 0.2s; color: var(--primary); }}
+    .c-accordion__content {{ padding: 20px; background: var(--bg-surface); display: none; font-size: 0.95rem; }}
 
-    /* ── EMPTY STATE ── */
-    .c-empty-state {{
-        display: flex; flex-direction: column; align-items: center;
-        justify-content: center; padding: 48px 24px; text-align: center;
-        color: var(--text-muted);
+    /* Breadcrumbs */
+    .c-breadcrumbs {{ display: flex; align-items: center; gap: 8px; list-style: none; padding: 0; margin: 0; }}
+    .c-breadcrumbs__item {{ display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); }}
+    .c-breadcrumbs__item a {{ color: var(--primary); text-decoration: none; font-weight: 600; }}
+    .c-breadcrumbs__separator {{ opacity: 0.5; font-family: var(--font-mono); }}
+    /* Charts */
+    .c-chart-container {{
+        position: relative; width: 100%; margin-bottom: 24px;
+        background: var(--bg-surface); border: 1px solid var(--border);
+        padding: 20px; border-left: 4px solid var(--primary);
+        border-radius: var(--radius);
     }}
-    .c-empty-state__icon {{ font-size: 2rem; margin-bottom: 12px; opacity: 0.4; }}
-    .c-empty-state__title {{ font-weight: 800; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 6px; }}
-    .c-empty-state__text {{ font-size: 0.8rem; line-height: 1.6; }}
-
-    /* ── TOAST ── */
-    .c-toast-container {{
-        position: fixed; bottom: 80px; right: 16px;
-        display: flex; flex-direction: column; gap: 8px;
-        z-index: 9000;
+    .c-chart-title {{
+        margin-top: 0; font-family: var(--font-mono); font-size: 0.85rem;
+        margin-bottom: 16px; color: var(--text-main); text-transform: uppercase;
+        font-weight: 800;
     }}
-
-    /* ── BEJSON FORM ── */
-    .c-bejson-form {{ display: flex; flex-direction: column; gap: 1rem; }}
-    .c-bejson-form__field {{ display: flex; flex-direction: column; gap: 4px; }}
-    .c-bejson-form__label {{
-        font-family: var(--font-mono); font-size: 0.6rem;
-        text-transform: uppercase; letter-spacing: 0.08em;
-        color: var(--text-muted);
-    }}
-    .c-bejson-form__type {{
-        font-family: var(--font-mono); font-size: 0.6rem;
-        color: var(--primary); margin-left: 4px;
-    }}
-    .c-bejson-form__input, .c-bejson-form__textarea {{
-        width: 100%; background: var(--bg-page);
-        border: 1px solid var(--border); border-radius: var(--radius);
-        padding: 8px 10px; font-family: var(--font-mono);
-        font-size: 0.8rem; color: var(--text-main);
-        transition: border-color 0.2s ease; outline: none;
-    }}
-    .c-bejson-form__input:focus,
-    .c-bejson-form__textarea:focus {{ border-color: var(--primary); }}
-    .c-bejson-form__actions {{ display: flex; gap: 8px; }}
-    .c-bejson-form__btn-submit {{ /* inherits from c-code-box__copy */ }}
-    .c-bejson-form__btn-reset {{
-        background: var(--bg-alt); color: var(--text-muted);
-        border: 1px solid var(--border); border-radius: var(--radius);
-        padding: 8px 16px; font-family: var(--font-mono);
-        font-size: 0.7rem; cursor: pointer; transition: var(--transition);
-    }}
-    .c-bejson-form__btn-reset:hover {{ border-color: var(--primary); color: var(--primary); }}
-    .c-bejson-form__form {{ display: contents; }}
-
-    /* ── BEJSON TABLE BUTTON ── */
-    .c-bejson-table__btn {{
-        background: none; border: none; cursor: pointer;
-        font-family: var(--font-mono); font-size: 0.65rem;
-        text-transform: uppercase; padding: 4px 8px;
-        color: var(--text-muted); border-radius: var(--radius);
-        transition: var(--transition);
-    }}
-    .c-bejson-table__btn:hover {{ color: var(--primary); background: var(--bg-alt); }}
-
-    /* ── DASHBOARD / STATS ── */
-    .c-stats-dashboard {{ /* container for dashboard content */ }}
-
-    /* ── ARTICLE ── */
-    .c-article {{ max-width: 760px; }}
-
-    /* ── BACKUP MANAGER ── */
-    .c-backup-manager {{ /* container */ }}
-
-    /* ── IMAGE GALLERY ── */
-    .c-image-gallery {{
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 1rem;
-    }}
-
 }}
-
-/* ═══════════════════════════════════════════════════
-   BECSS UTILITY LAYER (v2026)
-   Spacing · Flex · Color · Display
-   ═══════════════════════════════════════════════════ */
-
-@layer utilities {{
-
-    /* Flex */
-    .u-flex  {{ display: flex; }}
-    .u-grid  {{ display: grid; }}
-    .u-block {{ display: block; }}
-    .u-hidden {{ display: none !important; }}
-
-    .u-flex-col     {{ flex-direction: column; }}
-    .u-flex-wrap    {{ flex-wrap: wrap; }}
-    .u-flex-1       {{ flex: 1; }}
-
-    .u-justify-between {{ justify-content: space-between; }}
-    .u-justify-center  {{ justify-content: center; }}
-    .u-justify-end     {{ justify-content: flex-end; }}
-
-    .u-align-center  {{ align-items: center; }}
-    .u-align-start   {{ align-items: flex-start; }}
-    .u-align-end     {{ align-items: flex-end; }}
-
-    .u-gap-8  {{ gap: 0.5rem; }}
-    .u-gap-16 {{ gap: 1rem; }}
-    .u-gap-24 {{ gap: 1.5rem; }}
-    .u-gap-32 {{ gap: 2rem; }}
-
-    /* Margin bottom */
-    .u-mb-8  {{ margin-bottom: 0.5rem; }}
-    .u-mb-16 {{ margin-bottom: 1rem; }}
-    .u-mb-24 {{ margin-bottom: 1.5rem; }}
-    .u-mb-32 {{ margin-bottom: 2rem; }}
-
-    /* Margin top */
-    .u-mt-8  {{ margin-top: 0.5rem; }}
-    .u-mt-16 {{ margin-top: 1rem; }}
-    .u-mt-24 {{ margin-top: 1.5rem; }}
-    .u-mt-32 {{ margin-top: 2rem; }}
-
-    /* Text */
-    .u-text-muted   {{ color: var(--text-muted); }}
-    .u-text-primary {{ color: var(--primary); }}
-    .u-text-main    {{ color: var(--text-main); }}
-    .u-text-upper   {{ text-transform: uppercase; }}
-    .u-text-mono    {{ font-family: var(--font-mono); }}
-
-    .u-fs-small {{ font-size: 0.75rem; }}
-    .u-fs-xsmall {{ font-size: 0.65rem; }}
-
-    .u-fw-bold  {{ font-weight: 700; }}
-    .u-fw-black {{ font-weight: 800; }}
-
-    /* Overflow */
-    .u-truncate {{
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }}
-
-    /* ── BADGE ── */
-    .u-badge {{
-        display: inline-flex;
-        align-items: center;
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-family: var(--font-mono);
-        font-size: 0.6rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        background: var(--bg-alt);
-        color: var(--text-muted);
-        border: 1px solid var(--border);
-    }}
-    .u-badge--active {{
-        background: oklch(95% 0.06 150);
-        color: oklch(35% 0.12 150);
-        border-color: oklch(80% 0.08 150);
-    }}
-    .u-badge--inactive {{
-        background: var(--bg-alt);
-        color: var(--text-muted);
-        opacity: 0.65;
-    }}
-    .u-badge--warn {{
-        background: oklch(95% 0.08 80);
-        color: oklch(35% 0.12 80);
-        border-color: oklch(80% 0.1 80);
-    }}
-
-    /* Full width */
-    .u-w-full {{ width: 100%; }}
-    .u-max-w-sm {{ max-width: 400px; }}
-    .u-max-w-md {{ max-width: 640px; }}
-
-}}
-
 """
