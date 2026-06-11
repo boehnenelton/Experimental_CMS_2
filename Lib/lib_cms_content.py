@@ -71,7 +71,7 @@ def _cms_content_init_page_file(file_path: str, title: str, html_body: str = "")
     meta_row[fm["Record_Type_Parent"]] = "PageMeta"
     meta_row[fm["meta_title"]]         = title
     meta_row[fm["meta_description"]]   = ""
-    doc = BEJSONCore.bejson_core_add_record(doc, meta_row)
+    BEJSONCore.bejson_core_add_record(doc, meta_row)
     
     # Add Content record
     content_row = [None] * f_count
@@ -79,7 +79,7 @@ def _cms_content_init_page_file(file_path: str, title: str, html_body: str = "")
     content_row[fm["html_body"]]          = html_body
     content_row[fm["markdown_body"]]      = ""
     
-    doc = BEJSONCore.bejson_core_add_record(doc, content_row)
+    BEJSONCore.bejson_core_add_record(doc, content_row)
     BEJSONCore.bejson_core_atomic_write(file_path, doc)
 
 def cms_content_get_page_body(pages_dir: str, page_uuid: str) -> str:
@@ -142,7 +142,7 @@ def cms_content_create_page(
     new_row[_idx("author_ref")]         = author_ref
     new_row[_idx("featured_img")]       = featured_img
     
-    doc = BEJSONCore.bejson_core_add_record(doc, new_row)
+    BEJSONCore.bejson_core_add_record(doc, new_row)
     BEJSONCore.bejson_core_atomic_write(master_db_path, doc)
     
     # 2. Create individual content file
@@ -245,7 +245,8 @@ def cms_content_delete_page(master_db_path: str, pages_dir: str, page_uuid: str)
 def cms_content_list_pages(master_db_path: str) -> List[Dict]:
     """List all pages from master index as a list of dictionaries."""
     doc = BEJSONCore.bejson_core_load_file(master_db_path)
-    records = BEJSONCore.bejson_core_get_records_by_type(doc, "PageRecord")
+    if not doc: return []
+    records = BEJSONCore.bejson_core_filter_rows(doc, "Record_Type_Parent", "PageRecord")
     fields = doc.get("Fields", [])
     
     results = []

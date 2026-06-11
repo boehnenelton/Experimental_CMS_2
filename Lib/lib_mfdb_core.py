@@ -19,6 +19,7 @@ import shutil
 import tempfile
 import zipfile
 import hashlib
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -92,26 +93,32 @@ def _get_manifest_entry(manifest_path: str, entity_name: str) -> dict:
 
 
 
-def _read_file_content(path: str) -> str:
+def _read_file_content(path: str) -> Optional[str]:
     """Reads file content, supporting .mfdb.zip archives."""
     p = Path(path)
-    if p.is_file() and not path.lower().endswith(".zip"):
+    try:
+        if p.is_file() and not path.lower().endswith(".zip"):
+            return p.read_text(encoding="utf-8")
+        
+        # Check for zip path parts
+        parts = p.parts
+        for i, part in enumerate(parts):
+            if part.lower().endswith(".zip"):
+                zip_path = str(Path(*parts[:i+1]))
+                inner_path = "/".join(parts[i+1:])
+                if os.path.exists(zip_path):
+                    with zipfile.ZipFile(zip_path, "r") as z:
+                        if inner_path in z.namelist():
+                            return z.read(inner_path).decode("utf-8")
+                        elif not inner_path and "104a.mfdb.bejson" in z.namelist():
+                             return z.read("104a.mfdb.bejson").decode("utf-8")
+        
+        if not p.exists():
+            return None
+            
         return p.read_text(encoding="utf-8")
-    
-    # Check for zip path parts
-    parts = p.parts
-    for i, part in enumerate(parts):
-        if part.lower().endswith(".zip"):
-            zip_path = str(Path(*parts[:i+1]))
-            inner_path = "/".join(parts[i+1:])
-            if os.path.exists(zip_path):
-                with zipfile.ZipFile(zip_path, "r") as z:
-                    if inner_path in z.namelist():
-                        return z.read(inner_path).decode("utf-8")
-                    elif not inner_path and "104a.mfdb.bejson" in z.namelist():
-                         return z.read("104a.mfdb.bejson").decode("utf-8")
-    
-    return p.read_text(encoding="utf-8")
+    except Exception:
+        return None
 
 def _get_entity_path(manifest_path: str, entity_name: str) -> str:
     entry = _get_manifest_entry(manifest_path, entity_name)
@@ -122,16 +129,29 @@ def _load_entity_doc(manifest_path: str, entity_name: str) -> dict:
     """Load and validate the raw BEJSON 104 doc for an entity."""
     entity_path = _get_entity_path(manifest_path, entity_name)
     content = _read_file_content(entity_path)
+    if content is None:
+        raise MFDBCoreError(
+            f"Failed to read entity file: {entity_name} ({entity_path})",
+            E_MFDB_CORE_ENTITY_NOT_FOUND
+        )
     from lib_bejson_core import bejson_core_load_string
-    return bejson_core_load_string(content)
+    doc = bejson_core_load_string(content)
+    if doc is None:
+        raise MFDBCoreError(
+            f"Failed to load entity doc: {entity_name} ({entity_path})",
+            E_MFDB_CORE_ENTITY_NOT_FOUND
+        )
+    return doc
 
 
 def _write_entity_doc(doc: dict, entity_path: str) -> None:
-    bejson_core_atomic_write(entity_path, doc)
+    if not bejson_core_atomic_write(entity_path, doc):
+        raise MFDBCoreError(f"Failed to write entity doc to {entity_path}", E_MFDB_CORE_WRITE_FAILED)
 
 
 def _write_manifest_doc(doc: dict, manifest_path: str) -> None:
-    bejson_core_atomic_write(manifest_path, doc)
+    if not bejson_core_atomic_write(manifest_path, doc):
+        raise MFDBCoreError(f"Failed to write manifest doc to {manifest_path}", E_MFDB_CORE_WRITE_FAILED)
 
 
 def _update_manifest_record_count(
@@ -217,7 +237,22 @@ class MFDBArchive:
         target_p.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(archive_path, 'r') as zip_ref:
-            zip_ref.extractall(target_dir)
+            # REMEDIATED: Secure extraction loop to mitigate Zip Slip (Audit Finding 2).
+            from lib_bejson_path_guard import bejson_safe_join
+            for member in zip_ref.namelist():
+                # Skip directories as safe_join/open will handle them
+                if member.endswith('/'): continue
+                
+                # Boundary check via safe_join
+                try:
+                    safe_path = bejson_safe_join(target_dir, member)
+                    # Ensure parent directory exists
+                    os.makedirs(os.path.dirname(safe_path), exist_ok=True)
+                    with zip_ref.open(member) as source, open(safe_path, "wb") as target:
+                        shutil.copyfileobj(source, target)
+                except ValueError as e:
+                    logging.error(f"[MFDB_CORE] Security Alert: {e}")
+                    raise MFDBCoreError(f"Secure extraction failed: {e}", E_MFDB_CORE_ARCHIVE_ERROR)
 
         if not manifest_path.exists():
             shutil.rmtree(target_dir)
@@ -539,7 +574,10 @@ def mfdb_core_load_manifest(manifest_path: str) -> list[dict]:
     Returns all manifest records as a list of field-name-keyed dicts.
     """
     mfdb_validator_validate_manifest(manifest_path)
-    return _get_manifest_entries(manifest_path)
+    doc = _load_json(manifest_path)
+    if not isinstance(doc, dict):
+        raise MFDBCoreError(f"Failed to load manifest: {manifest_path} (not a dict)", E_MFDB_CORE_MANIFEST_NOT_FOUND)
+    return _rows_as_dicts(doc)
 
 
 def mfdb_core_load_entity(manifest_path: str, entity_name: str) -> list[dict]:
@@ -548,6 +586,8 @@ def mfdb_core_load_entity(manifest_path: str, entity_name: str) -> list[dict]:
     Returns a list of field-name-keyed dicts (dense - no null-padding).
     """
     doc = _load_entity_doc(manifest_path, entity_name)
+    if not isinstance(doc, dict):
+        raise MFDBCoreError(f"Failed to load entity: {entity_name} (not a dict)", E_MFDB_CORE_ENTITY_NOT_FOUND)
     return _rows_as_dicts(doc)
 
 
@@ -646,14 +686,11 @@ def mfdb_core_add_entity_record(
     sync_count:    bool = True,
 ) -> dict:
     """Append a record to an entity file."""
-    entity_path = _get_entity_path(manifest_path, entity_name)
-    doc         = bejson_core_load_file(entity_path)
-    if not doc:
-        raise BEJSONCoreError(f"Failed to load entity file: {entity_path}")
-    
+    doc = _load_entity_doc(manifest_path, entity_name)
     if not bejson_core_add_record(doc, values):
         raise BEJSONCoreError(f"Failed to add record to {entity_name}")
         
+    entity_path = _get_entity_path(manifest_path, entity_name)
     _write_entity_doc(doc, entity_path)
     if sync_count:
         _update_manifest_record_count(manifest_path, entity_name, len(doc["Values"]))
@@ -667,14 +704,11 @@ def mfdb_core_remove_entity_record(
     sync_count:    bool = True,
 ) -> dict:
     """Remove a record at record_index from an entity file."""
-    entity_path = _get_entity_path(manifest_path, entity_name)
-    doc         = bejson_core_load_file(entity_path)
-    if not doc:
-        raise BEJSONCoreError(f"Failed to load entity file: {entity_path}")
-
+    doc = _load_entity_doc(manifest_path, entity_name)
     if not bejson_core_remove_record(doc, record_index):
         raise BEJSONCoreError(f"Failed to remove record {record_index} from {entity_name}")
 
+    entity_path = _get_entity_path(manifest_path, entity_name)
     _write_entity_doc(doc, entity_path)
     if sync_count:
         _update_manifest_record_count(manifest_path, entity_name, len(doc["Values"]))
@@ -689,14 +723,14 @@ def mfdb_core_update_entity_record(
     new_value:     Any,
 ) -> dict:
     """Update a single named field in a specific record of an entity file."""
-    entity_path = _get_entity_path(manifest_path, entity_name)
-    doc         = bejson_core_load_file(entity_path)
-    if not doc:
-        raise BEJSONCoreError(f"Failed to load entity file: {entity_path}")
+    doc = _load_entity_doc(manifest_path, entity_name)
+    if not isinstance(doc, dict):
+        raise BEJSONCoreError(f"Malformed entity doc for {entity_name}")
 
     if not bejson_core_update_field(doc, record_index, field_name, new_value):
         raise BEJSONCoreError(f"Failed to update field '{field_name}' in {entity_name}")
 
+    entity_path = _get_entity_path(manifest_path, entity_name)
     _write_entity_doc(doc, entity_path)
     return doc
 
@@ -786,7 +820,7 @@ def mfdb_core_create_database(
     db_description: str = "",
     schema_version: str = "1.0.0",
     author:         str = "Elton Boehnen",
-    mfdb_version:   str = "1.3.1",
+    mfdb_version:   str = "1.31",
     network_role: str = "Master",
 ) -> str:
     """Create a new MFDB from scratch."""

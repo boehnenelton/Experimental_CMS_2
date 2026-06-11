@@ -137,7 +137,12 @@ class MFDB_CMS_Manager:
         # 2. CONTENT DATABASE
         if not os.path.exists(self.content_manifest):
             content_entities = [
-                {"name": "Category", "primary_key": "slug", "fields": [{"name": "name", "type": "string"}, {"name": "slug", "type": "string"}, {"name": "description", "type": "string"}, {"name": "feed_type", "type": "string"}]},
+                {"name": "Category", "primary_key": "category_slug", "fields": [
+                    {"name": "category_name", "type": "string"},
+                    {"name": "category_slug", "type": "string"},
+                    {"name": "description", "type": "string"},
+                    {"name": "feed_type", "type": "string"}
+                ]},
                 {"name": "Page", "primary_key": "page_uuid", "fields": [{"name": "page_uuid", "type": "string"}, {"name": "title", "type": "string"}, {"name": "slug", "type": "string"}, {"name": "category_fk", "type": "string"}, {"name": "author_fk", "type": "string"}, {"name": "page_type", "type": "string"}, {"name": "featured_img", "type": "string"}, {"name": "created_at", "type": "string"}]},
                 {"name": "PageContent", "fields": [{"name": "page_uuid_fk", "type": "string"}, {"name": "html_body", "type": "string"}, {"name": "markdown_body", "type": "string"}, {"name": "source_files", "type": "array"}, {"name": "video_url", "type": "string"}, {"name": "pdf_url", "type": "string"}, {"name": "pros", "type": "array"}, {"name": "cons", "type": "array"}, {"name": "verdict_score", "type": "number"}]},
                 {"name": "StandaloneApp", "primary_key": "app_uuid", "fields": [{"name": "app_uuid", "type": "string"}, {"name": "name", "type": "string"}, {"name": "slug", "type": "string"}, {"name": "description", "type": "string"}, {"name": "category_fk", "type": "string"}, {"name": "featured_img", "type": "string"}, {"name": "entry_file", "type": "string"}, {"name": "created_at", "type": "string"}]}
@@ -216,17 +221,15 @@ class MFDB_CMS_Manager:
                 return True
         return False
 
-    def add_category(self, name: str, slug: str, desc: str, feed_type: str):
-        MFDBCore.mfdb_core_add_entity_record(self.content_manifest, "Category", [name, slug, desc, feed_type])
+    def add_category(self, name: str, slug: str, description: str = "", feed_type: str = "blog"):
+        MFDBCore.mfdb_core_add_entity_record(self.content_manifest, "Category", [name, slug, description, feed_type])
         self.log_change("Category", "ADD", slug)
 
-    def update_category(self, slug: str, name: str, desc: str, feed_type: str):
+    def update_category(self, slug: str, name: str):
         recs = MFDBCore.mfdb_core_load_entity(self.content_manifest, "Category")
         for i, r in enumerate(recs):
-            if r["slug"] == slug:
-                MFDBCore.mfdb_core_update_entity_record(self.content_manifest, "Category", i, "name", name)
-                MFDBCore.mfdb_core_update_entity_record(self.content_manifest, "Category", i, "description", desc)
-                MFDBCore.mfdb_core_update_entity_record(self.content_manifest, "Category", i, "feed_type", feed_type)
+            if r["category_slug"] == slug:
+                MFDBCore.mfdb_core_update_entity_record(self.content_manifest, "Category", i, "category_name", name)
                 self.log_change("Category", "UPDATE", slug)
                 break
 
@@ -273,8 +276,6 @@ class MFDB_CMS_Manager:
         self.log_change("Page", "DELETE", page_uuid)
 
     def delete_category(self, slug: str):
-        if slug == "uncategorized":
-            return False
         recs = MFDBCore.mfdb_core_load_entity(self.content_manifest, "Category")
         for i, r in enumerate(recs):
             if r.get("slug") == slug:
@@ -332,6 +333,12 @@ class MFDB_CMS_Manager:
 
     def get_apps(self) -> List[Dict]:
         return MFDBCore.mfdb_core_load_entity(self.content_manifest, "StandaloneApp")
+
+    def get_pages(self) -> List[Dict]:
+        return MFDBCore.mfdb_core_load_entity(self.content_manifest, "Page")
+
+    def get_categories(self) -> List[Dict]:
+        return MFDBCore.mfdb_core_load_entity(self.content_manifest, "Category")
 
     def get_pages_in_category(self, category_slug: str) -> List[Dict]:
         return [p for p in MFDBCore.mfdb_core_load_entity(self.content_manifest, "Page")

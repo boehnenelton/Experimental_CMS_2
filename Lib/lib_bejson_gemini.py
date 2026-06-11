@@ -46,7 +46,6 @@ try:
     )
     from lib_bejson_schema import SCHEMA_MODEL_REGISTRY
 except ImportError as e:
-    print(f"Gemini Lib Error: Missing core dependencies. {e}")
     sys.exit(1)
 
 # --- Legacy Fallback Constants ---
@@ -73,7 +72,7 @@ class GeminiKeyRegistry:
             default_keys = {
                 "Format": "BEJSON", "Format_Version": "104", "Records_Type": ["ApiKey"],
                 "Fields": [{"name": "key", "type": "string"}],
-                "Values": [["YOUR_KEY_HERE"]]
+                "Values": [[os.getenv("GEMINI_API_KEY", "YOUR_KEY_HERE")]]
             }
             bejson_core_atomic_write(str(self.file_path), default_keys)
         except Exception as e: logging.warning(f"[GeminiLib] Key default fail: {e}")

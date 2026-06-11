@@ -82,6 +82,7 @@ COMPONENT_TEMPLATE = """
         
         var searchTerm = "";
         var isSchemaView = false;
+        var currentTotalPages = 1;
         
         var selectEl = document.getElementById(cid + '_select');
         var searchEl = document.getElementById(cid + '_search');
@@ -150,12 +151,12 @@ COMPONENT_TEMPLATE = """
             }}
 
             countEl.textContent = 'RECORDS: ' + records.length;
-            var totalPages = Math.ceil(records.length / pageSize) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
+            currentTotalPages = Math.ceil(records.length / pageSize) || 1;
+            if (currentPage > currentTotalPages) currentPage = currentTotalPages;
             
-            pageInfoEl.textContent = 'PAGE ' + currentPage + ' / ' + totalPages;
+            pageInfoEl.textContent = 'PAGE ' + currentPage + ' / ' + currentTotalPages;
             prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.disabled = currentPage === currentTotalPages;
 
             // Render Head
             var headHtml = '<tr>';
@@ -221,42 +222,51 @@ COMPONENT_TEMPLATE = """
             countEl.textContent = 'FIELDS: ' + fields.length;
         }}
 
-        schemaToggleBtn.onclick = function() {{
-            isSchemaView = !isSchemaView;
-            schemaToggleBtn.textContent = isSchemaView ? "RECORDS" : "SCHEMA";
-            renderTable();
-        }};
-
-        // Event Delegation for Table Head (Sort)
-        theadEl.onclick = function(e) {{
-            var target = e.target.closest('[data-action="sort"]');
-            if (!target) return;
-            var field = target.dataset.field;
-            if (currentSort.column === field) currentSort.direction = (currentSort.direction === 'asc' ? 'desc' : 'asc');
-            else {{ currentSort.column = field; currentSort.direction = 'asc'; }}
-            renderTable();
-        }};
-
-        prevBtn.onclick = function() {{ if (currentPage > 1) {{ currentPage--; renderTable(); }} }};
-        nextBtn.onclick = function() {{ if (currentPage < Math.ceil(bejson.Values.length / pageSize)) {{ currentPage++; renderTable(); }} }};
-        
-        searchEl.oninput = function(e) {{
+        selectEl.addEventListener('change', function() {{ currentPage = 1; renderTable(); }});
+        searchEl.addEventListener('input', function(e) {{
             searchTerm = e.target.value;
             currentPage = 1;
             renderTable();
-        }};
+        }});
+
+        // --- Centralized Event Delegation (Phase 3: Secure Logic) ---
+        document.getElementById(cid).addEventListener('click', function(e) {{
+            var target = e.target;
+            
+            // 1. Sort Toggle
+            var sortBtn = target.closest('[data-action="sort"]');
+            if (sortBtn) {{
+                var field = sortBtn.dataset.field;
+                if (currentSort.column === field) currentSort.direction = (currentSort.direction === 'asc' ? 'desc' : 'asc');
+                else {{ currentSort.column = field; currentSort.direction = 'asc'; }}
+                renderTable();
+                return;
+            }}
+
+            // 2. Schema Toggle
+            if (target.id === cid + '_schema_toggle') {{
+                isSchemaView = !isSchemaView;
+                target.textContent = isSchemaView ? "RECORDS" : "SCHEMA";
+                renderTable();
+                return;
+            }}
+
+            // 3. Pagination
+            if (target.id === cid + '_prev' && currentPage > 1) {{ currentPage--; renderTable(); return; }}
+            if (target.id === cid + '_next' && currentPage < currentTotalPages) {{ currentPage++; renderTable(); return; }}
+        }});
 
         if (bejson.Records_Type) {{
-            bejson.Records_Type.forEach(function(type) {{
+            var rt = Array.isArray(bejson.Records_Type) ? bejson.Records_Type : [bejson.Records_Type];
+            rt.forEach(function(type) {{
                 var option = document.createElement('option'); 
-                option.value = type; option.textContent = type.toUpperCase(); 
+                option.value = type; option.textContent = String(type).toUpperCase(); 
                 selectEl.appendChild(option);
             }});
         }} else {{
             var option = document.createElement('option'); option.value = "default"; option.textContent = "RECORDS"; selectEl.appendChild(option);
         }}
         
-        selectEl.onchange = function() {{ currentPage = 1; renderTable(); }}; 
         renderTable();
     }})();
     </script>
