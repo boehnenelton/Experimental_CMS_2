@@ -1,0 +1,43 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<div class="u-mb-32">
+    <h1 class="c-card__title" style="font-size: 2rem;">Site Navigation</h1>
+</div>
+
+<div class="c-card" style="margin-bottom: 24px;">
+        <h2 class="c-card__title">Add Custom Link</h2>
+        <form method="POST" style="display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; align-items: flex-end;">
+            <div style="flex: 1; min-width: 160px;">
+                <label style="font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">Display Label</label>
+                <input name="label" placeholder="GitHub" required>
+            </div>
+            <div style="flex: 2; min-width: 220px;">
+                <label style="font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px;">Destination URL</label>
+                <input name="url" placeholder="https://..." required>
+            </div>
+            <div>
+                <button type="submit" class="c-code-box__copy" style="padding: 12px 24px;">ADD TO MENU</button>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        {% set columns = ['Label', 'Target URL'] %}
+        {% set rows = [] %}
+        {% for l in links %}
+            {% set actions = [
+                {'url': '/navigation/delete/' + l.label, 'label': 'Delete', 'class': 'text-red-500'}
+            ] %}
+            {% do rows.append({
+                'label': l.label,
+                'url': l.url,
+                '_actions': actions
+            }) %}
+        {% endfor %}
+
+        {% with columns=columns, rows=rows %}
+            {% include "components/backend/Data-Table.html" %}
+        {% endwith %}
+    </div>
+{% endblock %}

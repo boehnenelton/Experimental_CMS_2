@@ -1,0 +1,123 @@
+{% extends "admin_base.html" %}
+
+{% block title %}{{ 'Edit: ' + p.title if p.page_uuid else 'New Page' }} | ExpCSS{% endblock %}
+
+{% block content %}
+<div class="c-bejson-form" container-type="inline-size">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 class="emphasis" style="margin: 0;">Content Architect</h1>
+        <div style="display: flex; gap: 12px;">
+            <button type="button" onclick="window.open('/preview/{{ p.page_uuid }}', '_blank')" class="c-bejson-table__btn">PREVIEW</button>
+            <button form="editor-form" type="submit" class="c-bejson-form__btn-submit" style="margin: 0;">COMMIT DATA</button>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div>{{ 'Editing existing relational record.' if p.page_uuid else 'Creating new atomic page entry.' }} Status: <span class="emphasis">Awaiting Sync</span></div>
+    </div>
+
+    <form id="editor-form" action="/save" method="POST" class="c-bejson-form__form">
+        <input type="hidden" name="page_uuid" value="{{ p.page_uuid }}">
+
+        <div class="c-bejson-form__field">
+            <label class="c-bejson-form__label">page_title <span class="c-bejson-form__type">[string]</span></label>
+            <input name="title" value="{{ p.title }}" class="c-bejson-form__input" placeholder="Enter Page Title" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="c-bejson-form__field">
+                <label class="c-bejson-form__label">template_type <span class="c-bejson-form__type">[enum]</span></label>
+                <select id="page_type_select" name="page_type" class="c-bejson-form__input" onchange="switchView(this.value)" style="height: 42px;">
+                    <option value="article" {% if p.page_type == 'article' %}selected{% endif %}>Article</option>
+                    <option value="video" {% if p.page_type == 'video' %}selected{% endif %}>Video</option>
+                    <option value="pdf-viewer" {% if p.page_type == 'pdf-viewer' %}selected{% endif %}>PDF Viewer</option>
+                    <option value="source-code" {% if p.page_type == 'source-code' %}selected{% endif %}>Source Code</option>
+                </select>
+            </div>
+            <div class="c-bejson-form__field">
+                <label class="c-bejson-form__label">category_fk <span class="c-bejson-form__type">[slug]</span></label>
+                <select name="category" class="c-bejson-form__input" style="height: 42px;">
+                    {% for c in cats %}
+                    <option value="{{ c.slug }}" {% if c.slug == p.category_fk %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- TYPE SPECIFIC VIEW: Video -->
+        <div id="view-video" class="type-view hidden c-bejson-form__field">
+            <label class="c-bejson-form__label">video_url <span class="c-bejson-form__type">[url]</span></label>
+            <input name="video_url" value="{{ p.video_url }}" class="c-bejson-form__input" placeholder="https://www.youtube.com/embed/...">
+        </div>
+
+        <!-- TYPE SPECIFIC VIEW: Source Code -->
+        <div id="view-source-code" class="type-view hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label class="c-bejson-form__label">source_files <span class="c-bejson-form__type">[json_array]</span></label>
+                <button type="button" onclick="addFile()" class="c-bejson-table__btn" style="font-size: 0.6rem; padding: 4px 8px;">+ ADD FILE</button>
+            </div>
+            <div id="file-editor-container" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                {% for file in p.source_files %}
+                <div class="file-entry content-card" style="padding: 12px; background: var(--bg-page);">
+                    <input class="file-name c-bejson-form__input" style="font-size: 0.75rem; margin-bottom: 8px; border-style: dashed;" value="{{ file.filename }}" placeholder="filename.js">
+                    <textarea class="file-content c-bejson-form__textarea" style="height: 150px;">{{ file.content }}</textarea>
+                    <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; border: none; background: none; font-size: 0.6rem; font-weight: 800; cursor: pointer; margin-top: 8px;">[ REMOVE_FILE ]</button>
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="source_files_json" id="source_files_json">
+        </div>
+
+        <div class="c-bejson-form__field">
+            <label id="body-label" class="c-bejson-form__label">main_payload <span class="c-bejson-form__type">[html]</span></label>
+            <textarea name="html_body" class="c-bejson-form__textarea" style="height: 400px; font-family: var(--font-mono); font-size: 0.8rem;">{{ p.html_body }}</textarea>
+        </div>
+
+        <div class="c-bejson-form__actions" style="margin-top: 32px;">
+            <button type="submit" class="c-bejson-form__btn-submit">COMMIT_RECORD</button>
+            <a href="/pages" class="c-bejson-form__btn-reset" style="text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center;">CANCEL</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function switchView(type) {
+        document.querySelectorAll('.type-view').forEach(v => v.classList.add('hidden'));
+        if (type === 'video') document.getElementById('view-video').classList.remove('hidden');
+        if (type === 'source-code') document.getElementById('view-source-code').classList.remove('hidden');
+        
+        const label = document.getElementById('body-label');
+        label.innerHTML = type === 'article' ? 'article_body <span class="c-bejson-form__type">[html]</span>' : 'description <span class="c-bejson-form__type">[html]</span>';
+    }
+
+    function addFile() {
+        const container = document.getElementById('file-editor-container');
+        const div = document.createElement('div');
+        div.className = 'file-entry content-card';
+        div.style.padding = '12px';
+        div.style.background = 'var(--bg-page)';
+        div.innerHTML = `
+            <input class="file-name c-bejson-form__input" style="font-size: 0.75rem; margin-bottom: 8px; border-style: dashed;" placeholder="filename.js">
+            <textarea class="file-content c-bejson-form__textarea" style="height: 150px;"></textarea>
+            <button type="button" onclick="this.parentElement.remove()" style="color: #ef4444; border: none; background: none; font-size: 0.6rem; font-weight: 800; cursor: pointer; margin-top: 8px;">[ REMOVE_FILE ]</button>
+        `;
+        container.appendChild(div);
+    }
+
+    document.getElementById('editor-form').addEventListener('submit', (e) => {
+        const files = [];
+        document.querySelectorAll('.file-entry').forEach(entry => {
+            const name = entry.querySelector('.file-name').value;
+            const content = entry.querySelector('.file-content').value;
+            if (name) files.push({filename: name, content: content});
+        });
+        document.getElementById('source_files_json').value = JSON.stringify(files);
+    });
+
+    window.onload = () => switchView(document.getElementById('page_type_select').value);
+</script>
+
+<style>
+    .hidden { display: none !important; }
+</style>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!-- ExpCSS RECONSTRUCTION | Universal HTML3 Skeleton v2.2 -->
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | {{ site_title }}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono&display=swap" rel="stylesheet">
+
+    <!-- Tailwind for Grid/Utility (ExpCSS Standard) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root { --accent: #2563eb; --bg: #050505; --surface: #0f172a; --border: #1e293b; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        
+        header { 
+            height: 64px; background: var(--surface); border-bottom: 1px solid var(--border); 
+            display: flex; align-items: center; padding: 0 1.5rem; gap: 1.5rem; flex-shrink: 0;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .hamburger { cursor: pointer; display: flex; flex-direction: column; gap: 5px; width: 24px; }
+        .hamburger span { display: block; height: 2px; background: #fff; width: 100%; transition: 0.3s; }
+        .header-logo { font-weight: 800; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; font-size: 1rem; }
+
+        .app-shell { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        /* Sidebar */
+        .app-sidebar { 
+            width: 320px; background: var(--surface); border-right: 1px solid var(--border); 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; z-index: 90;
+            overflow-y: auto;
+        }
+        .app-sidebar.collapsed { transform: translateX(-320px); margin-right: -320px; }
+        
+        /* Mobile Overlay */
+        .sidebar-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 80; 
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* Main Content */
+        .app-main { flex: 1; overflow-y: auto; padding: 2rem; position: relative; scrollbar-width: thin; scrollbar-color: var(--accent) #111; }
+        
+        @media (max-width: 1024px) {
+            .app-sidebar { position: fixed; height: calc(100% - 60px); top: 60px; transform: translateX(-100%); }
+            .app-sidebar.active { transform: translateX(0); }
+            .app-sidebar.collapsed { margin-right: 0; }
+        }
+
+        .breadcrumb-strip { font-size: 0.7rem; color: #555; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 1px; }
+        .breadcrumb-strip span { color: var(--accent); }
+
+        .content-container { max-width: 900px; margin: 0 auto; }
+        
+        /* Ensure HTML3 List looks right in sidebar */
+        .c-html3-list--tree { border: none !important; background: transparent !important; padding: 1rem !important; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="hamburger" id="navToggle"><span></span><span></span><span></span></div>
+        <div class="header-logo">{{ site_title }}</div>
+        <div style="flex:1"></div>
+        <div style="font-size:0.6rem; color:#444; font-family:monospace;">PUBLIC NODE | HTML3 v1.2</div>
+    </header>
+
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <div class="app-shell">
+        <aside class="app-sidebar" id="sidebar">
+            {{ sidebar_block | safe }}
+        </aside>
+
+        <main class="app-main">
+            <div class="breadcrumb-strip">SITE / {{ category_name or 'ROOT' }} / <span>{{ page_title }}</span></div>
+            
+            <div class="content-container">
+                {{ main_content | safe }}
+            </div>
+
+            {% if related_content %}
+            <section class="mt-12 pt-8 border-t border-gray-800">
+                <h3 class="text-xl font-bold mb-6">More from {{ category_name }}</h3>
+                {{ related_block | safe }}
+            </section>
+            {% endif %}
+
+            <!-- BLOCK: FOOTER -->
+            <footer class="mt-20">
+                {{ footer_block | safe }}
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const btn = document.getElementById('navToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        function toggle() {
+            const isMobile = window.innerWidth <= 1024;
+            if (isMobile) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        btn.addEventListener('click', toggle);
+        overlay.addEventListener('click', toggle);
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

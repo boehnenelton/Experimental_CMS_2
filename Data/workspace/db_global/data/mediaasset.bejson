@@ -1,0 +1,45 @@
+{
+  "Format": "BEJSON",
+  "Format_Version": "104",
+  "Format_Creator": "Elton Boehnen",
+  "Parent_Hierarchy": "../104a.mfdb.bejson",
+  "Records_Type": [
+    "MediaAsset"
+  ],
+  "Fields": [
+    {
+      "name": "filename",
+      "type": "string"
+    },
+    {
+      "name": "original_name",
+      "type": "string"
+    },
+    {
+      "name": "file_hash",
+      "type": "string"
+    },
+    {
+      "name": "file_size",
+      "type": "integer"
+    },
+    {
+      "name": "mime_type",
+      "type": "string"
+    },
+    {
+      "name": "uploaded_at",
+      "type": "string"
+    }
+  ],
+  "Values": [
+    [
+      "BEJSON_MFDB_v1.31_AUDIT_-_Slide_15.png",
+      "BEJSON_MFDB_v1.31_AUDIT_-_Slide_15.png",
+      "b72b3fd74690dc78cb10b6620998195171d96a12e3586280d360882d95c2e19a",
+      1149242,
+      "image/png",
+      "2026-06-06T09:29:13Z"
+    ]
+  ]
+}

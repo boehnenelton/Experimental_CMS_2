@@ -1,0 +1,35 @@
+<!-- ExpCSS RECONSTRUCTION | Category Feed Skeleton v2.0 -->
+<!-- Dynamic Feed Scaffolding: Supports Blog, News, Products, and Masonry -->
+
+<div class="category-header mb-12">
+    <div class="content-card">
+        <h1 class="text-3xl font-black text-[#fe3626] uppercase tracking-tighter">{{ category_name }}</h1>
+        <div class="text-gray-400 mt-2 font-mono text-sm">// {{ category_description }}</div>
+    </div>
+</div>
+
+{% if feed_type == 'news' %}
+    <div class="c-feed-news-advanced">
+        {{ content_items | safe }}
+    </div>
+{% elif feed_type == 'products' %}
+    <div class="c-feed-products">
+        {{ content_items | safe }}
+    </div>
+{% elif feed_type == 'masonry' %}
+    <div class="c-feed-masonry">
+        {{ content_items | safe }}
+    </div>
+{% else %}
+    <div class="c-feed-blog">
+        <div class="blog-feed">
+            {{ content_items | safe }}
+        </div>
+    </div>
+{% endif %}
+
+{% if pagination_html %}
+    <div class="c-pagination mt-12">
+        {{ pagination_html | safe }}
+    </div>
+{% endif %}
