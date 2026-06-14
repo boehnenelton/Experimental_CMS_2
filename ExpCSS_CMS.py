@@ -1,13 +1,14 @@
 # RELATIONAL_GUID: 3e685944-8c75-4d43-bdab-8bc89548dba4
-# VERSION: v2.4.5
+# VERSION: v3.0.0
 # CREDITS: Elton Boehnen (github.com/boehnenelton)
 # FILE: ExpCSS_CMS.py
-# DATE: 2026-06-13
+# DATE: 2026-06-14
 
 """
-Experimental CSS CMS v2.4.5 - Unified Administrative Dashboard (HTML3)
+Experimental CSS CMS v2.4.6 - Unified Administrative Dashboard (HTML3)
 Description: Unified management tool for MFDB data, content editing, and site deployment.
              Updated with HTML3 Layout, List Renderer, and Dynamic Tables.
+             Migrated to isolated Lib_EXPCMS library family (no shared lib_cms_* with BEJSON CMS).
 """
 import os
 import sys
@@ -24,18 +25,18 @@ from werkzeug.utils import secure_filename
 
 # Add Lib to path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LIB_DIR = os.path.join(BASE_DIR, "Lib")
+LIB_DIR = os.path.join(BASE_DIR, "Lib_EXPCMS")
 if LIB_DIR not in sys.path:
     sys.path.append(LIB_DIR)
 
-from lib_cms_mfdb import MFDB_CMS_Manager
+from lib_expcms_mfdb import MFDB_CMS_Manager
 from lib_bejson_html3_skeletons import COLOR, BRUTAL_COLOR, CSS_CORE, CSS_BRUTAL, HTML_SKELETON, HTML_SKELETON_BRUTAL
 from lib_html3_sidemenu import _sidebar_html
 from lib_html3_list_renderer import HTML3_List_Renderer
 from lib_html3_body import html_card, html_stats_bar, html_code_box, html_brutal_table
 from lib_html3_tables import html_table
 from lib_html3_widgets import html_widget, html_info_box
-from lib_cms_chunker_wrapper import CMS_Chunker_Wrapper
+from lib_expcms_chunker_wrapper import CMS_Chunker_Wrapper
 import lib_mfdb_core as MFDBCore
 
 # --- Flask App Initialization ---

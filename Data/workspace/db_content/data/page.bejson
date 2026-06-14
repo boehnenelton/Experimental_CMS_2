@@ -40,16 +40,5 @@
       "type": "string"
     }
   ],
-  "Values": [
-    [
-      "dc161053-b212-4aed-8215-b8c5835d38ba",
-      "Test2 page",
-      "test2-page",
-      "Test2",
-      null,
-      "article",
-      null,
-      "2026-06-04T11:29:45Z"
-    ]
-  ]
+  "Values": []
 }

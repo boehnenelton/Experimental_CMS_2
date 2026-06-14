@@ -8,11 +8,11 @@
   ],
   "Fields": [
     {
-      "name": "name",
+      "name": "category_name",
       "type": "string"
     },
     {
-      "name": "slug",
+      "name": "category_slug",
       "type": "string"
     },
     {
@@ -24,5 +24,12 @@
       "type": "string"
     }
   ],
-  "Values": []
+  "Values": [
+    [
+      "Uncategorized",
+      "uncategorized",
+      "General posts",
+      "blog"
+    ]
+  ]
 }

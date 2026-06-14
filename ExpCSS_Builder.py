@@ -1,11 +1,11 @@
 # RELATIONAL_GUID: 3e685944-8c75-4d43-bdab-8bc89548dba4
-# VERSION: v2.0.2
+# VERSION: v3.0.0
 # CREDITS: Elton Boehnen (github.com/boehnenelton)
 # DATE: 2026-06-06
 # FILE: ExpCSS_Builder.py
 
 """
-Experimental CSS Builder v2.0.2 - Static Site Generator
+Experimental CSS Builder v2.0.3 - Static Site Generator
 Description: Builds the static website using the BEJSON HTML Template Scaffolding.
              Rewired for block-based injection (Header, Sidebar, Body, Footer).
 """
@@ -16,13 +16,13 @@ import random
 import re
 from jinja2 import Template
 
-# Add Lib to path
+# Add Lib_EXPCMS to path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LIB_DIR = os.path.join(BASE_DIR, "Lib")
+LIB_DIR = os.path.join(BASE_DIR, "Lib_EXPCMS")
 if LIB_DIR not in sys.path:
     sys.path.append(LIB_DIR)
 
-from lib_cms_mfdb import MFDB_CMS_Manager
+from lib_expcms_mfdb import MFDB_CMS_Manager
 from lib_html3_app_layout import HTML3_App_Layout
 from lib_html3_list_renderer import HTML3_List_Renderer
 import lib_mfdb_core as MFDBCore
@@ -183,7 +183,7 @@ class ExpCSS_Builder:
         # Create temporary BEJSON for navigation
         nav_values = []
         for i, cat in enumerate(context["categories"]):
-            nav_values.append([f"cat_{i}", cat["name"], cat.get("description", ""), None, f"{rel_prefix}{cat['slug']}/index.html"])
+            nav_values.append([f"cat_{i}", cat["category_name"], cat.get("description", ""), None, f"{rel_prefix}{cat['category_slug']}/index.html"])
         
         # Add a placeholder for contact/info
         nav_values.append(["inf1", "Contact Us", "Get in touch", None, f"{rel_prefix}contact.html"])
@@ -240,15 +240,15 @@ class ExpCSS_Builder:
             f.write(html)
 
     def _build_category(self, cat, context):
-        cat_dir = os.path.join(self.output_dir, cat["slug"])
+        cat_dir = os.path.join(self.output_dir, cat["category_slug"])
         os.makedirs(cat_dir, exist_ok=True)
-        self.site_urls.append(f"{cat['slug']}/index.html")
+        self.site_urls.append(f"{cat['category_slug']}/index.html")
         
         with open(os.path.join(self.skel_dir, "Category_Feed_Skeleton.html"), "r") as f:
             feed_skel = f.read()
             
-        pages = self.cms.get_pages_in_category(cat["slug"])
-        apps = self.cms.get_apps_in_category(cat["slug"])
+        pages = self.cms.get_pages_in_category(cat["category_slug"])
+        apps = self.cms.get_apps_in_category(cat["category_slug"])
         
         feed_type = cat.get("feed_type", "blog")
         
@@ -263,7 +263,7 @@ class ExpCSS_Builder:
                 <div class="news-item">
                     <div class="news-thumb">{"<img src='"+img_url+"'>" if p.get('featured_img') else "<span>IMG</span>"}</div>
                     <div class="news-content">
-                        <div class="news-category">{cat["name"]}</div>
+                        <div class="news-category">{cat["category_name"]}</div>
                         <h2 class="news-title"><a href="{p["slug"]}/index.html">{p["title"]}</a></h2>
                         <p class="news-excerpt">{desc}</p>
                         <div class="news-meta"><span>{p.get("created_at")}</span></div>
@@ -296,7 +296,7 @@ class ExpCSS_Builder:
                 </div>'''
             
         feed_content = Template(feed_skel).render({
-            "category_name": cat["name"],
+            "category_name": cat["category_name"],
             "category_description": cat["description"],
             "feed_type": feed_type,
             "content_items": item_html
@@ -312,16 +312,16 @@ class ExpCSS_Builder:
     def _build_page(self, page, cat, context):
         page_uuid = page["page_uuid"]
         page_data = self.cms.get_full_page_data(page_uuid)
-        page_dir = os.path.join(self.output_dir, cat["slug"], page["slug"])
+        page_dir = os.path.join(self.output_dir, cat["category_slug"], page["slug"])
         os.makedirs(page_dir, exist_ok=True)
-        self.site_urls.append(f"{cat['slug']}/{page['slug']}/index.html")
+        self.site_urls.append(f"{cat['category_slug']}/{page['slug']}/index.html")
         
         with open(os.path.join(self.skel_dir, "Article_Skeleton.html"), "r") as f:
             page_skel = f.read()
             
         page_content = Template(page_skel).render({
             **page_data,
-            "category_name": cat["name"],
+            "category_name": cat["category_name"],
             "rel_prefix": "../../"
         })
         
