@@ -61,7 +61,7 @@ except ImportError as e:
 # Constants
 # ---------------------------------------------------------------------------
 
-MFDB_SPEC_VERSION = "3.0.0"
+MFDB_SPEC_VERSION = "1.31"
 
 DEFAULT_CONFIG = {
     "project_name": "MyProject",

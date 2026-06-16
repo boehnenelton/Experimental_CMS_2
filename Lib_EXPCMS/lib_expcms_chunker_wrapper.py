@@ -1,18 +1,3 @@
-"""
-Library:      lib_expcms_chunker_wrapper.py
-Family:       EXPCMS
-Jurisdiction: ["EXPCMS", "PY"]
-Status:       OFFICIAL
-Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-Format_Creator: Elton Boehnen
-Date:         2026-06-14
-Description:  CMS chunker/backup wrapper for Experimental CMS.
-RELATIONAL_ID: c3d4e5f6-a7b8-9012-cd34-ef5678901234
-"""
-
-VERSION = "3.0.0"
-
 import os
 import sys
 import shutil

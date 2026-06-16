@@ -4,8 +4,8 @@ Family:       EXPCMS
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-            MFDB Version: 3.0.0
+Version:      2.0.4 OFFICIAL
+            MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-05-18
 Description:  Relational database layer for CMS content, pages, and taxonomies.
@@ -133,7 +133,7 @@ class MFDB_CMS_Manager:
                 {"name": "SocialLink", "fields": [{"name": "platform", "type": "string"}, {"name": "url", "type": "string"}, {"name": "icon", "type": "string"}]},
                 {"name": "AuthorProfile", "primary_key": "author_uuid", "fields": [{"name": "author_uuid", "type": "string"}, {"name": "name", "type": "string"}, {"name": "bio", "type": "string"}, {"name": "image_url", "type": "string"}]},
                 {"name": "AdUnit", "primary_key": "ad_uuid", "fields": [{"name": "ad_uuid", "type": "string"}, {"name": "name", "type": "string"}, {"name": "image_url", "type": "string"}, {"name": "link_url", "type": "string"}, {"name": "zone", "type": "string"}, {"name": "active", "type": "boolean"}]},
-                {"name": "MediaAsset", "primary_key": "filename", "fields": [{"name": "filename", "type": "string"}, {"name": "original_name", "type": "string"}, {"name": "file_hash", "type": "string"}, {"name": "file_size", "type": "integer"}, {"name": "mime_type", "type": "string"}, {"name": "uploaded_at", "type": "string"}]}
+                {"name": "MediaAsset", "primary_key": "filename", "fields": [{"name": "filename", "type": "string"}, {"name": "original_name", "type": "string"}, {"name": "file_hash", "type": "string"}, {"name": "file_size", "type": "integer"}, {"name": "mime_type", "type": "string"}, {"name": "uploaded_at", "type": "string"}, {"name": "folder", "type": "string"}]}
             ]
             MFDBCore.mfdb_core_create_database(root_dir=self.global_db_root, db_name="BEJSON CMS Global", entities=global_entities)
             self.add_global_config("site_title", "boehnenelton2024")
@@ -218,25 +218,12 @@ class MFDB_CMS_Manager:
         self.log_change("AdUnit", "ADD", auuid)
         return auuid
 
-    def add_asset(self, src_path: str, custom_filename: str = None):
-        """Copies a file to assets and registers it in the database."""
-        src = Path(src_path)
-        if not src.exists(): return None
-        
-        fname = custom_filename or src.name
-        dest = os.path.join(self.assets_dir, fname)
-        shutil.copy2(src, dest)
-        
-        with open(dest, "rb") as f:
-            data = f.read()
-        fhash = hashlib.sha256(data).hexdigest()
-        fsize = len(data)
-        mtype = "application/octet-stream"
-        
+    def add_asset(self, filename: str, original_name: str, file_hash: str, file_size: int, mime_type: str, folder: str = ""):
+        """Registers an asset that has already been saved to the assets directory."""
         uploaded_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        MFDBCore.mfdb_core_add_entity_record(self.global_manifest, "MediaAsset", [fname, src.name, fhash, fsize, mtype, uploaded_at])
-        self.log_change("MediaAsset", "ADD", fname)
-        return fname
+        MFDBCore.mfdb_core_add_entity_record(self.global_manifest, "MediaAsset", [filename, original_name, file_hash, file_size, mime_type, uploaded_at, folder])
+        self.log_change("MediaAsset", "ADD", filename)
+        return filename
 
     def delete_asset(self, filename: str):
         recs = MFDBCore.mfdb_core_load_entity(self.global_manifest, "MediaAsset")
@@ -253,11 +240,14 @@ class MFDB_CMS_Manager:
         MFDBCore.mfdb_core_add_entity_record(self.content_manifest, "Category", [name, slug, description, feed_type])
         self.log_change("Category", "ADD", slug)
 
-    def update_category(self, slug: str, name: str):
-        recs = MFDBCore.mfdb_core_load_entity(self.content_manifest, "Category")
+    def update_category(self, slug: str, name: str, description: str = None, feed_type: str = None):
+        recs = self.get_categories()
         for i, r in enumerate(recs):
             if r["category_slug"] == slug:
-                MFDBCore.mfdb_core_update_entity_record(self.content_manifest, "Category", i, "category_name", name)
+                updates = {"category_name": name}
+                if description is not None: updates["description"] = description
+                if feed_type is not None: updates["feed_type"] = feed_type
+                MFDBCore.mfdb_core_update_entity_record_bulk(self.content_manifest, "Category", i, updates)
                 self.log_change("Category", "UPDATE", slug)
                 break
 

@@ -3,7 +3,7 @@ Library:      lib_bejson_errors.py
 Family:       Core
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
+Version:      2.0.1 OFFICIAL
 Description:  Unified error registry for BEJSON ecosystem.
 """
 

@@ -4,8 +4,8 @@ Family:       HTML3
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-              MFDB Version: 3.0.0
+Version:      2.1.1 OFFICIAL
+              MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-06-05
 Description:  Authoritative List / Tree / Sidebar renderer for BEJSON 104 documents.
@@ -20,7 +20,7 @@ import sys
 from typing import Any, Dict, List, Optional
 
 SCRIPT_NAME    = "lib_html3_list_renderer.py"
-SCRIPT_VERSION = "3.0.0"
+SCRIPT_VERSION = "2.1.1"
 RELATIONAL_ID  = "a1b2c3d4-e5f6-7890-ab12-cd34ef567890"
 
 LIB_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -340,6 +340,8 @@ class HTML3_List_Renderer:
                 on_click    — JS function name called with (id) on selection
         """
         if isinstance(doc_or_path, str):
+            if not _HAS_CORE:
+                return "<p>Error: lib_bejson_core not available.</p>"
             doc = BEJSONCore.bejson_core_load_file(doc_or_path)
             if not doc:
                 return "<p>Error: could not load BEJSON file.</p>"

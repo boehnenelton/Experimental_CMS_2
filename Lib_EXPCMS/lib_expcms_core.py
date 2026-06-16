@@ -1,7 +1,7 @@
 # ==============================================================================
-# LIBRARY: lib_expcms_core.py
+# LIBRARY: lib_cms_core.py
 # PURPOSE: Extension library for BEJSON_CMS built on core MFDB libraries.
-# VERSION: v3.0.0
+# VERSION: 18.0 (CoreEvolution Integration)
 # AUTHOR:  Elton Boehnen
 # DATE:    2026-06-06
 # CHANGES: - Integrated bejson_core_get_field_map() for O(1) field lookups.
@@ -26,8 +26,8 @@ try:
 except ImportError:
     # Handle if run from outside
     try:
-        from . import lib_mfdb_core as MFDB
-        from . import lib_bejson_core as Core
+        import lib_mfdb_core as MFDB
+        import lib_bejson_core as Core
     except:
         MFDB = None
         Core = None

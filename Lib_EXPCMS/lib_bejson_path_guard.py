@@ -4,7 +4,7 @@ Family:       Utility
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
+Version:      1.0.0 OFFICIAL
 Date:         2026-06-02
 Description:  Secure path resolver and boundary protection logic.
 REMEDIATED:   Implemented Phase 2 Path Guarding (Mitigates Path Traversal).
@@ -47,4 +47,4 @@ def resolve_storage_path(path: str) -> str:
         
     return path
 
-VERSION = "3.0.0"
+VERSION = "1.1.0"

@@ -4,8 +4,8 @@ Family:       Core
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL (Unified Schema Registry)
-            MFDB Version: 3.0.0
+Version:      2.1.2 OFFICIAL (Unified Schema Registry)
+            MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-06-05
 Description:  Unified registry for authoritative BEJSON schemas.

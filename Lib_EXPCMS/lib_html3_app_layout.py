@@ -1,18 +1,3 @@
-"""
-Library:      lib_html3_app_layout.py
-Family:       HTML3
-Jurisdiction: ["EXPCMS", "PY"]
-Status:       OFFICIAL
-Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-Format_Creator: Elton Boehnen
-Date:         2026-06-14
-Description:  Standard layout engine for HTML3 Applications.
-RELATIONAL_ID: b2c3d4e5-f6a7-8901-bc23-de45fa678901
-"""
-
-VERSION = "3.0.0"
-
 class HTML3_App_Layout:
     """
     Standard layout engine for HTML3 Applications.

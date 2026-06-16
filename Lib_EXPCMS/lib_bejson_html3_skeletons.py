@@ -4,8 +4,8 @@ Family:       HTML3
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-            MFDB Version: 3.0.0
+Version:      3.0.1 OFFICIAL
+            MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-05-29
 Description:  Authoritative BECSS skeletal templates for HTML3.
@@ -15,7 +15,7 @@ Description:  Authoritative BECSS skeletal templates for HTML3.
 import html as html_mod
 import json
 
-VERSION = "3.0.0"
+VERSION = "3.0.1"
 SCRIPT_NAME = "lib_bejson_html3_skeletons.py"
 RELATIONAL_ID = "c7d6b5a4-1f8a-4e8a-9d6c-5f4b5a6c7d8e"
 
@@ -85,6 +85,8 @@ CSS_CORE_SKELETON = """
         -webkit-font-smoothing: antialiased;
         padding-bottom: 60px;
         min-height: 100dvh;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
     }}
 }}
 
@@ -109,7 +111,7 @@ CSS_CORE_SKELETON = """
 
     body {{ font-family: var(--font-sans); line-height: 1.6; }}
     
-    h1, h2, h3, h4 {{ color: var(--text-main); line-height: 1.1; margin-bottom: 0.5rem; font-weight: 800; }}
+    h1, h2, h3, h4 {{ color: var(--text-main); line-height: 1.1; margin-bottom: 0.5rem; font-weight: 800; overflow-wrap: anywhere; }}
     h1 {{ font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing: -0.02em; }}
     h2 {{ font-size: 1.1rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }}
 
@@ -226,6 +228,8 @@ HTML_SKELETON = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>{{title}}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

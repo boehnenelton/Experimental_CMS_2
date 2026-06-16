@@ -143,8 +143,8 @@ def media_library():
     all_assets = cms.get_assets()
     grouped = collections.defaultdict(list)
     for a in all_assets:
-        char = a['filename'][0].upper() if a['filename'][0].isalpha() else '#'
-        grouped[char].append(a)
+        folder = a.get('folder') or 'Root'
+        grouped[folder].append(a)
     
     sorted_groups = sorted(grouped.items())
     return render_template("media_library.html", groups=sorted_groups)
@@ -190,14 +190,22 @@ def media_upload():
                         data = z.read(name)
                         process_data(data, os.path.basename(name), mimetypes.guess_type(name)[0] or 'application/octet-stream', folder)
             else:
-                process_data(f.read(), f.filename, f.content_type)
+                # Handle potential path in filename from directory upload
+                folder = os.path.dirname(f.filename)
+                base_name = os.path.basename(f.filename)
+                process_data(f.read(), base_name, f.content_type, folder)
             
     flash(f"Uploaded {uploaded}, Skipped {skipped}")
     return redirect(url_for('media_library'))
 
 @app.route('/media/serve/<path:filename>')
 def serve_media(filename):
-    return send_from_directory(cms.assets_dir, filename)
+    # Try exact path first (in case of hierarchy on disk)
+    if os.path.exists(os.path.join(cms.assets_dir, filename)):
+        return send_from_directory(cms.assets_dir, filename)
+    # Fallback to flat lookup (organized by folder in DB but flat on disk)
+    base = os.path.basename(filename)
+    return send_from_directory(cms.assets_dir, base)
 
 @app.route('/media/delete/<filename>')
 def media_delete(filename):
@@ -530,6 +538,7 @@ def get_sidebar_html():
         ],
         "Values": [
             ["d1", "Dashboard", "", None, "/"],
+            ["lp1", "Landing Page", "", None, "/landing_editor"],
             ["c1", "Categories", "", None, "/categories"],
             ["p1", "Pages", "", None, "/pages"],
             ["a1", "Standalone Apps", "", None, "/apps"],

@@ -5,7 +5,7 @@ Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
 Version:      3.0.0 OFFICIAL
-            MFDB Version: 3.0.0
+            MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-05-29
 Description:  Navigation and sidebar component manager for web apps.

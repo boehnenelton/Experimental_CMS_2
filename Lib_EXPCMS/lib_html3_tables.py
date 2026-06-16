@@ -4,8 +4,8 @@ Family:       HTML3
 Jurisdiction: ["BEJSON_LIBRARIES", "PY"]
 Status:       OFFICIAL
 Author:       Elton Boehnen
-Version:      3.0.0 OFFICIAL
-            MFDB Version: 3.0.0
+Version:      3.1.0 OFFICIAL
+            MFDB Version: 1.31
 Format_Creator: Elton Boehnen
 Date:         2026-06-04
 Description:  BECSS-compliant tabular data visualization engine with search and pagination.
@@ -16,7 +16,7 @@ import json
 import uuid
 from typing import Dict, Optional, Any
 
-VERSION = "3.0.0"
+VERSION = "3.1.0"
 SCRIPT_NAME = "lib_html3_tables.py"
 RELATIONAL_ID = "8f3e2d1c-4b5a-4e8a-9d6c-3f4b5a6c7d8e"
 ES5_SAFE = True
